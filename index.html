@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sinais Forex Pro - Dados Reais de Mercado</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#1e3c72">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Forex Pro">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlNpbmFpcyBGb3JleCBQcm8iLAogICJzaG9ydF9uYW1lIjogIkZvcmV4IFBybyIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMWUzYzcyIiwKICAidGhlbWVfY29sb3IiOiAiIzFlM2M3MiIsCiAgImRlc2NyaXB0aW9uIjogIlNpc3RlbWEgcHJvZmlzc2lvbmFsIGRlIHNpbmFpcyBGb3JleCIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbCw8c3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDEwMCAxMDAnPjx0ZXh0IHk9Jy45ZW0nIGZvbnQtc2l6ZT0nOTAnPvCfk4o8L3RleHQ+PC9zdmc+IiwKICAgICAgInNpemVzIjogIjE5MngxOTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIgogICAgfQogIF0KfQ==">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -12,70 +20,111 @@
             --bg: #f8f9fa; --card: #ffffff; --text: #333;
             --text-secondary: #666; --border: #e0e0e0;
             --shadow: 0 5px 20px rgba(0,0,0,0.1);
+            --london-open: #3498db; --ny-open: #e74c3c;
+            --session-bg: rgba(0,0,0,0.03);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             min-height: 100vh; padding: 20px;
+            -webkit-font-smoothing: antialiased;
         }
         .app-container {
-            max-width: 1400px; margin: 0 auto;
+            max-width: 1500px; margin: 0 auto;
             background: white; border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden;
         }
         .header {
             background: linear-gradient(135deg, #1e3c72, #2a5298);
             color: white; padding: 20px 30px;
+            position: relative; overflow: hidden;
         }
-        .header h1 { font-size: 1.8em; }
+        .header::after {
+            content: ''; position: absolute; top: 0; left: 0;
+            width: 100%; height: 3px;
+            background: linear-gradient(90deg, #2ed573, #ffa502, #ff4757, #667eea);
+            animation: headerGlow 4s linear infinite; background-size: 200% 100%;
+        }
+        @keyframes headerGlow { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+        .header h1 { font-size: 1.8em; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .real-data-badge {
             background: #2ed573; padding: 5px 15px;
-            border-radius: 20px; font-size: 0.8em; margin-left: 15px;
-            animation: pulse 2s infinite;
+            border-radius: 20px; font-size: 0.8em; animation: pulse 2s infinite;
         }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; } 50% { opacity: 0.7; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        
+        /* Session indicators */
+        .session-indicators {
+            display: flex; gap: 15px; margin-top: 10px; flex-wrap: wrap;
         }
-        .api-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 15px; padding: 20px;
+        .session-badge {
+            padding: 6px 14px; border-radius: 20px; font-size: 0.8em;
+            font-weight: 600; display: flex; align-items: center; gap: 6px;
+            transition: all 0.3s;
         }
+        .session-badge.london {
+            background: rgba(52,152,219,0.3); border: 2px solid var(--london-open);
+            color: white;
+        }
+        .session-badge.ny {
+            background: rgba(231,76,60,0.3); border: 2px solid var(--ny-open);
+            color: white;
+        }
+        .session-badge.active-session {
+            animation: sessionPulse 1.5s infinite; box-shadow: 0 0 15px currentColor;
+        }
+        @keyframes sessionPulse {
+            0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); }
+        }
+        .session-dot {
+            width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+        }
+        .session-dot.london-dot { background: var(--london-open); }
+        .session-dot.ny-dot { background: var(--ny-open); }
+        
+        /* Install button */
+        .install-btn {
+            background: rgba(255,255,255,0.2); border: 2px solid white;
+            color: white; padding: 8px 16px; border-radius: 20px;
+            cursor: pointer; font-size: 0.85em; transition: all 0.3s;
+            display: none;
+        }
+        .install-btn:hover { background: rgba(255,255,255,0.3); }
+        
+        .api-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; padding: 20px; }
         .api-card {
             background: white; border-radius: 15px;
             padding: 20px; box-shadow: var(--shadow);
-            border-left: 4px solid #e0e0e0;
-            transition: all 0.3s;
+            border-left: 4px solid #e0e0e0; transition: all 0.3s;
         }
         .api-card.connected { border-left-color: #2ed573; }
         .api-card.disconnected { border-left-color: #ff4757; }
         .api-card:hover { transform: translateY(-2px); }
-        .api-header {
-            display: flex; justify-content: space-between;
-            align-items: center; margin-bottom: 15px;
-        }
+        .api-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .api-name { font-weight: bold; font-size: 1.1em; }
-        .api-status-dot {
-            width: 12px; height: 12px; border-radius: 50%;
-        }
+        .api-status-dot { width: 12px; height: 12px; border-radius: 50%; }
         .api-status-dot.online { background: #2ed573; }
         .api-status-dot.offline { background: #ff4757; }
+        
         .tab-nav {
             display: flex; background: #f0f2f5;
             padding: 10px; gap: 5px; flex-wrap: wrap;
-            border-bottom: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0; overflow-x: auto;
         }
         .tab-btn {
             padding: 12px 20px; background: white;
             border: none; border-radius: 8px; cursor: pointer;
             font-weight: 500; transition: all 0.3s; white-space: nowrap;
+            font-size: 0.9em;
         }
         .tab-btn:hover { background: #e0e0e0; }
         .tab-btn.active { background: var(--primary); color: white; }
         .tab-content { padding: 20px; }
         .tab-pane { display: none; }
-        .tab-pane.active { display: block; }
+        .tab-pane.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
         .card {
             background: white; border-radius: 15px;
             padding: 20px; box-shadow: var(--shadow);
@@ -84,8 +133,8 @@
         .card.buy { border-left-color: var(--buy); }
         .card.sell { border-left-color: var(--sell); }
         .grid { display: grid; gap: 20px; }
-        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
-        .grid-3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); }
+        .grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
         .btn {
             padding: 12px 24px; border: none;
             border-radius: 8px; cursor: pointer;
@@ -96,44 +145,56 @@
         .btn-sm { padding: 8px 16px; font-size: 0.9em; }
         .btn-buy { background: var(--buy); }
         .btn-sell { background: var(--sell); }
-        .btn-test { background: #ffa502; }
+        .btn-demo { background: linear-gradient(135deg, #f093fb, #f5576c); }
         input, select {
             padding: 10px; border: 2px solid #e0e0e0;
             border-radius: 8px; width: 100%; margin-bottom: 10px;
         }
+        
         .signal-item {
             background: white; padding: 15px;
             border-radius: 10px; margin-bottom: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             border-left: 4px solid #ffa502; cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s; position: relative;
         }
         .signal-item:hover { transform: translateX(5px); }
         .signal-item.buy { border-left-color: var(--buy); }
         .signal-item.sell { border-left-color: var(--sell); }
+        
+        .confluence-score {
+            display: inline-block; padding: 4px 10px;
+            border-radius: 12px; font-weight: bold; font-size: 0.85em;
+            margin-left: 8px;
+        }
+        .confluence-high { background: #d4edda; color: #155724; }
+        .confluence-medium { background: #fff3cd; color: #856404; }
+        .confluence-low { background: #f8d7da; color: #721c24; }
+        
         .data-source-tag {
             display: inline-block; padding: 3px 8px;
-            border-radius: 10px; font-size: 0.7em;
-            font-weight: bold; margin-left: 8px;
+            border-radius: 10px; font-size: 0.7em; font-weight: bold; margin-left: 8px;
         }
         .source-real { background: #d4edda; color: #155724; }
         .source-simulated { background: #fff3cd; color: #856404; }
-        .modal-overlay {
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); z-index: 1000;
-            display: none; align-items: center; justify-content: center;
+        
+        /* EMA Cloud */
+        .ema-cloud-container {
+            position: relative; height: 40px;
+            background: linear-gradient(180deg, rgba(46,213,115,0.15) 0%, rgba(255,71,87,0.15) 100%);
+            border-radius: 8px; margin: 10px 0; overflow: hidden;
         }
-        .modal-overlay.active { display: flex; }
-        .modal-content {
-            background: white; border-radius: 15px;
-            padding: 30px; max-width: 800px;
-            width: 95%; max-height: 90vh; overflow-y: auto;
+        .ema-cloud-fill {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(180deg, rgba(46,213,115,0.3) 0%, rgba(255,71,87,0.3) 100%);
+            transition: height 0.5s;
         }
-        .close-btn {
-            float: right; background: none;
-            border: none; font-size: 1.5em; cursor: pointer;
+        .ema-cloud-label {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-weight: bold; font-size: 0.85em; z-index: 1;
         }
+        
+        /* Heatmap */
         .heatmap-container {
             display: grid; grid-template-columns: repeat(6, 1fr);
             gap: 2px; background: #e0e0e0;
@@ -146,1035 +207,925 @@
             color: white; cursor: pointer; transition: transform 0.2s;
         }
         .heatmap-cell:hover { transform: scale(1.1); z-index: 1; }
-        .refresh-indicator {
-            display: inline-block; width: 8px; height: 8px;
-            border-radius: 50%; margin-right: 5px;
+        
+        /* Volume Profile */
+        .volume-profile-bar {
+            display: flex; align-items: flex-end;
+            gap: 2px; height: 100px; padding: 5px;
+            background: #f8f9fa; border-radius: 8px;
         }
-        .refresh-indicator.live { background: #2ed573; animation: blink 1s infinite; }
-        @keyframes blink {
-            0%, 100% { opacity: 1; } 50% { opacity: 0.3; }
+        .volume-profile-bar .vp-bar {
+            flex: 1; background: linear-gradient(180deg, var(--primary), var(--secondary));
+            border-radius: 3px 3px 0 0; transition: height 0.3s;
+            min-width: 4px;
         }
+        
+        /* ADX */
+        .adx-meter {
+            position: relative; height: 8px; background: #f0f0f0;
+            border-radius: 4px; overflow: hidden; margin: 5px 0;
+        }
+        .adx-fill {
+            height: 100%; transition: width 0.5s;
+            background: linear-gradient(90deg, #ffa502, #ff4757, #2ed573);
+        }
+        
+        /* Notification */
+        .notification-container {
+            position: fixed; top: 20px; right: 20px;
+            width: 400px; max-width: 90vw; z-index: 9999;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .toast {
+            background: white; border-radius: 12px; padding: 15px 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex; align-items: flex-start; gap: 12px;
+            transform: translateX(120%); animation: slideIn 0.4s forwards;
+            border-left: 5px solid #666; position: relative; overflow: hidden;
+        }
+        .toast.removing { animation: slideOut 0.3s forwards; }
+        @keyframes slideIn { to { transform: translateX(0); } }
+        @keyframes slideOut { from { transform: translateX(0); } to { transform: translateX(120%); } }
+        .toast-success { border-left-color: var(--buy); }
+        .toast-error { border-left-color: var(--sell); }
+        .toast-warning { border-left-color: var(--neutral); }
+        .toast-info { border-left-color: var(--primary); }
+        .toast-icon { font-size: 1.5em; flex-shrink: 0; }
+        .toast-success .toast-icon { color: var(--buy); }
+        .toast-error .toast-icon { color: var(--sell); }
+        .toast-content { flex: 1; min-width: 0; }
+        .toast-title { font-weight: 600; font-size: 0.95em; color: var(--text); }
+        .toast-message { font-size: 0.85em; color: var(--text-secondary); }
+        .toast-close { background: none; border: none; color: #999; cursor: pointer; padding: 0 5px; }
+        
+        /* Demo Mode Banner */
+        .demo-banner {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white; text-align: center; padding: 8px;
+            font-weight: bold; display: none; animation: pulse 2s infinite;
+        }
+        .demo-banner.active { display: block; }
+        
+        /* S/R zones */
+        .sr-zone {
+            display: inline-block; padding: 4px 10px; margin: 2px;
+            border-radius: 10px; font-size: 0.8em; font-weight: 600;
+        }
+        .sr-support { background: #d4edda; color: #155724; border: 1px solid var(--buy); }
+        .sr-resistance { background: #f8d7da; color: #721c24; border: 1px solid var(--sell); }
+        
         .widget-code {
             background: #1e1e1e; color: #d4d4d4;
             padding: 15px; border-radius: 8px;
-            font-family: monospace; white-space: pre-wrap;
+            font-family: monospace; white-space: pre-wrap; font-size: 0.85em;
         }
         @media (max-width: 768px) {
-            .tab-btn { font-size: 0.8em; padding: 8px 12px; }
+            .tab-btn { font-size: 0.75em; padding: 8px 10px; }
             .api-grid { grid-template-columns: 1fr; }
-            .heatmap-container { grid-template-columns: repeat(3, 1fr); }
-            .modal-content { padding: 15px; }
+            .notification-container { right: 10px; top: 10px; width: 300px; }
+            .grid-2 { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <div class="header">
-            <h1>
-                <i class="fas fa-chart-line"></i>
-                Sinais Forex Pro
-                <span class="real-data-badge" id="dataModeBadge">DADOS REAIS</span>
-            </h1>
-            <p style="margin-top: 5px; opacity: 0.9;">
-                Sistema profissional com múltiplas APIs de mercado — 
-                <span id="activeSources">0 fontes ativas</span>
-            </p>
-        </div>
 
-        <!-- Gerenciamento de APIs -->
-        <div class="api-grid" id="apiCards">
-            <!-- Interactive Brokers -->
-            <div class="api-card disconnected" id="card-ibkr">
-                <div class="api-header">
-                    <span class="api-name">🏦 Interactive Brokers</span>
-                    <span class="api-status-dot offline"></span>
-                </div>
-                <p style="font-size:0.85em;color:#666;">Broker • Dados profissionais • Execução real</p>
-                <input type="text" id="ibkrKey" placeholder="Client ID (opcional)">
-                <button class="btn btn-sm" onclick="testAPI('ibkr')">Testar Conexão</button>
-                <small style="display:block;margin-top:5px;color:#999;">Grátis para clientes IBKR</small>
-            </div>
-
-            <!-- FXCM -->
-            <div class="api-card disconnected" id="card-fxcm">
-                <div class="api-header">
-                    <span class="api-name">💱 FXCM</span>
-                    <span class="api-status-dot offline"></span>
-                </div>
-                <p style="font-size:0.85em;color:#666;">Broker • 3 APIs grátis • REST + FIX</p>
-                <input type="text" id="fxcmKey" placeholder="API Token">
-                <button class="btn btn-sm" onclick="testAPI('fxcm')">Testar Conexão</button>
-                <small style="display:block;margin-top:5px;color:#999;">ForexConnect / REST / FIX</small>
-            </div>
-
-            <!-- Twelve Data -->
-            <div class="api-card disconnected" id="card-twelvedata">
-                <div class="api-header">
-                    <span class="api-name">📊 Twelve Data</span>
-                    <span class="api-status-dot offline"></span>
-                </div>
-                <p style="font-size:0.85em;color:#666;">Dados • 60+ provedores • 1.500+ pares</p>
-                <input type="password" id="twelveKey" placeholder="API Key">
-                <button class="btn btn-sm" onclick="testAPI('twelvedata')">Testar Conexão</button>
-                <small style="display:block;margin-top:5px;color:#999;">800 req/dia grátis</small>
-            </div>
-
-            <!-- OANDA -->
-            <div class="api-card disconnected" id="card-oanda">
-                <div class="api-header">
-                    <span class="api-name">🏛️ OANDA</span>
-                    <span class="api-status-dot offline"></span>
-                </div>
-                <p style="font-size:0.85em;color:#666;">Broker • Dados institucionais • Prática grátis</p>
-                <input type="password" id="oandaKey" placeholder="API Key">
-                <button class="btn btn-sm" onclick="testAPI('oanda')">Testar Conexão</button>
-                <small style="display:block;margin-top:5px;color:#999;">Conta practice gratuita</small>
-            </div>
-
-            <!-- TraderMade -->
-            <div class="api-card disconnected" id="card-trademade">
-                <div class="api-header">
-                    <span class="api-name">📈 TraderMade</span>
-                    <span class="api-status-dot offline"></span>
-                </div>
-                <p style="font-size:0.85em;color:#666;">Dados • Grau institucional • 99.99% uptime</p>
-                <input type="password" id="trademadeKey" placeholder="API Key">
-                <button class="btn btn-sm" onclick="testAPI('trademade')">Testar Conexão</button>
-                <small style="display:block;margin-top:5px;color:#999;">30+ anos de dados</small>
-            </div>
-
-            <!-- Polygon.io -->
-            <div class="api-card disconnected" id="card-polygon">
-                <div class="api-header">
-                    <span class="api-name">🔷 Polygon.io</span>
-                    <span class="api-status-dot offline"></span>
-                </div>
-                <p style="font-size:0.85em;color:#666;">Dados • WebSocket • Nível institucional</p>
-                <input type="password" id="polygonKey" placeholder="API Key">
-                <button class="btn btn-sm" onclick="testAPI('polygon')">Testar Conexão</button>
-                <small style="display:block;margin-top:5px;color:#999;">Plano gratuito disponível</small>
-            </div>
-        </div>
-
-        <button class="btn" onclick="saveAllApiKeys()" style="margin: 0 20px 20px;">
-            💾 Salvar Todas as Chaves
-        </button>
-
-        <!-- Tabs -->
-        <div class="tab-nav">
-            <button class="tab-btn active" data-tab="dashboard">📊 Dashboard</button>
-            <button class="tab-btn" data-tab="backtesting">🔄 Backtesting Real</button>
-            <button class="tab-btn" data-tab="correlation">🔗 Correlação</button>
-            <button class="tab-btn" data-tab="patterns">🕯️ Padrões</button>
-            <button class="tab-btn" data-tab="multitf">⏰ Multi-Timeframe</button>
-            <button class="tab-btn" data-tab="sentiment">📊 Sentimento</button>
-            <button class="tab-btn" data-tab="compare">⚖️ Comparador</button>
-            <button class="tab-btn" data-tab="sessions">🌍 Sessões</button>
-            <button class="tab-btn" data-tab="widget">🔗 Widget</button>
-        </div>
-
-        <div class="tab-content">
-            <!-- Dashboard -->
-            <div class="tab-pane active" id="dashboard">
-                <div class="grid grid-2">
-                    <div class="card" id="mainSignalCard">
-                        <h3><span class="refresh-indicator live"></span> Sinal Principal</h3>
-                        <div id="mainSignalContent">Carregando dados reais...</div>
-                    </div>
-                    <div class="card">
-                        <h3>🧮 Calculadora de Posição Real</h3>
-                        <input type="number" id="accountBalance" placeholder="Saldo da conta ($)" value="10000">
-                        <input type="number" id="riskPercent" placeholder="Risco por trade (%)" value="2">
-                        <input type="number" id="entryPrice" placeholder="Preço de entrada">
-                        <input type="number" id="stopPrice" placeholder="Stop loss">
-                        <button class="btn" onclick="calculatePosition()">Calcular Lote Preciso</button>
-                        <div id="positionResult" style="margin-top:10px;"></div>
-                    </div>
-                </div>
-                <div class="card">
-                    <h3>📋 Sinais Recentes (Dados Reais)</h3>
-                    <div id="signalsList">Carregando...</div>
-                </div>
-            </div>
-
-            <!-- Backtesting -->
-            <div class="tab-pane" id="backtesting">
-                <div class="card">
-                    <h2>🔄 Backtesting com Dados Reais de Mercado</h2>
-                    <select id="btPair">
-                        <option>EUR_USD</option><option>GBP_USD</option><option>USD_JPY</option>
-                    </select>
-                    <select id="btTimeframe">
-                        <option value="H1">1 Hora</option><option value="H4">4 Horas</option><option value="D">Diário</option>
-                    </select>
-                    <select id="btStrategy">
-                        <option value="rsi_macd">RSI + MACD</option>
-                        <option value="ma_cross">Médias Móveis</option>
-                        <option value="bollinger">Bollinger Bands</option>
-                    </select>
-                    <select id="btDataSource">
-                        <option value="auto">Auto (melhor disponível)</option>
-                        <option value="oanda">OANDA</option>
-                        <option value="twelvedata">Twelve Data</option>
-                        <option value="ibkr">Interactive Brokers</option>
-                    </select>
-                    <button class="btn" onclick="runBacktest()">Executar Backtest Real</button>
-                    <div id="btResults" style="margin-top:20px;"></div>
-                </div>
-            </div>
-
-            <!-- Correlação -->
-            <div class="tab-pane" id="correlation">
-                <div class="card">
-                    <h2>🔗 Heatmap de Correlação (Dados Reais)</h2>
-                    <button class="btn" onclick="calculateCorrelation()">Atualizar Correlações</button>
-                    <div id="correlationHeatmap" style="margin-top:20px;"></div>
-                </div>
-            </div>
-
-            <!-- Padrões -->
-            <div class="tab-pane" id="patterns">
-                <div class="card">
-                    <h2>🕯️ Detecção de Padrões de Candlestick</h2>
-                    <select id="patternPair"><option>EUR_USD</option><option>GBP_USD</option></select>
-                    <button class="btn" onclick="detectPatterns()">Detectar Padrões</button>
-                    <div id="patternResults" style="margin-top:20px;"></div>
-                </div>
-            </div>
-
-            <!-- Multi-Timeframe -->
-            <div class="tab-pane" id="multitf">
-                <div class="card">
-                    <h2>⏰ Análise Multi-Timeframe</h2>
-                    <select id="mtfPair"><option>EUR_USD</option><option>GBP_USD</option></select>
-                    <button class="btn" onclick="runMTFAnalysis()">Analisar</button>
-                    <div id="mtfResults" style="margin-top:20px;"></div>
-                </div>
-            </div>
-
-            <!-- Sentimento -->
-            <div class="tab-pane" id="sentiment">
-                <div class="card">
-                    <h2>📊 Sentimento de Mercado</h2>
-                    <button class="btn" onclick="fetchSentiment()">Buscar Sentimento</button>
-                    <div id="sentimentData" style="margin-top:20px;"></div>
-                </div>
-            </div>
-
-            <!-- Comparador -->
-            <div class="tab-pane" id="compare">
-                <div class="card">
-                    <h2>⚖️ Comparador de Estratégias ao Vivo</h2>
-                    <button class="btn" onclick="compareStrategies()">Comparar Agora</button>
-                    <div id="compareResults" style="margin-top:20px;"></div>
-                </div>
-            </div>
-
-            <!-- Sessões -->
-            <div class="tab-pane" id="sessions">
-                <div class="card">
-                    <h2>🌍 Sessões de Mercado</h2>
-                    <div id="sessionInfo"></div>
-                </div>
-            </div>
-
-            <!-- Widget -->
-            <div class="tab-pane" id="widget">
-                <div class="card">
-                    <h2>🔗 Widget Incorporável</h2>
-                    <p>Copie o código para seu site:</p>
-                    <div class="widget-code" id="widgetCode"></div>
-                </div>
-            </div>
+<div class="app-container">
+    <div class="demo-banner" id="demoBanner">
+        🎮 MODO DEMO ATIVO — Banca Virtual: $<span id="demoBalance">10,000.00</span> | 
+        Lucro: $<span id="demoPnL" style="color:#2ed573;">0.00</span>
+    </div>
+    <div class="header">
+        <h1>
+            <i class="fas fa-chart-line"></i> Sinais Forex Pro
+            <span class="real-data-badge" id="dataModeBadge">DADOS REAIS</span>
+            <button class="install-btn" id="installBtn" onclick="installPWA()">
+                📲 Instalar App
+            </button>
+        </h1>
+        <div class="session-indicators">
+            <span class="session-badge london" id="londonBadge">
+                <span class="session-dot london-dot"></span> Londres
+            </span>
+            <span class="session-badge ny" id="nyBadge">
+                <span class="session-dot ny-dot"></span> Nova Iorque
+            </span>
+            <span style="color:white; font-size:0.85em; opacity:0.9;" id="activeSources">0 fontes ativas</span>
         </div>
     </div>
 
-    <!-- Modal -->
-    <div class="modal-overlay" id="tradeModal">
-        <div class="modal-content">
-            <button class="close-btn" onclick="closeModal()">&times;</button>
-            <div id="modalContent"></div>
+    <!-- API Cards -->
+    <div class="api-grid" id="apiCards">
+        <div class="api-card disconnected" id="card-oanda">
+            <div class="api-header"><span class="api-name">🏛️ OANDA</span><span class="api-status-dot offline"></span></div>
+            <input type="password" id="oandaKey" placeholder="API Key"><button class="btn btn-sm" onclick="testAPI('oanda')">Testar</button>
+        </div>
+        <div class="api-card disconnected" id="card-twelvedata">
+            <div class="api-header"><span class="api-name">📊 Twelve Data</span><span class="api-status-dot offline"></span></div>
+            <input type="password" id="twelveKey" placeholder="API Key"><button class="btn btn-sm" onclick="testAPI('twelvedata')">Testar</button>
+        </div>
+        <div class="api-card disconnected" id="card-polygon">
+            <div class="api-header"><span class="api-name">🔷 Polygon.io</span><span class="api-status-dot offline"></span></div>
+            <input type="password" id="polygonKey" placeholder="API Key"><button class="btn btn-sm" onclick="testAPI('polygon')">Testar</button>
         </div>
     </div>
+    <button class="btn" onclick="saveAllApiKeys()" style="margin: 0 20px 20px;">💾 Salvar Chaves</button>
 
-    <script>
-        // ============ CONFIGURAÇÃO ============
-        const PAIRS = ['EUR_USD', 'GBP_USD', 'USD_JPY', 'AUD_USD', 'USD_CAD', 'EUR_GBP'];
-        const API_KEYS_STORAGE = 'forex_pro_api_keys';
-        
-        let apiKeys = {
-            oanda: '', twelvedata: '', ibkr: '',
-            fxcm: '', trademade: '', polygon: ''
-        };
-        
-        let activeApis = {};
-        let currentSignals = [];
+    <!-- Tab Navigation -->
+    <div class="tab-nav">
+        <button class="tab-btn active" data-tab="dashboard">📊 Dashboard</button>
+        <button class="tab-btn" data-tab="emacloud">☁️ EMA Cloud</button>
+        <button class="tab-btn" data-tab="patterns">🕯️ Padrões</button>
+        <button class="tab-btn" data-tab="volume">📊 Volume Profile</button>
+        <button class="tab-btn" data-tab="srlevels">📐 Suporte/Resistência</button>
+        <button class="tab-btn" data-tab="confluence">🎯 Confluência</button>
+        <button class="tab-btn" data-tab="adx">📈 ADX</button>
+        <button class="tab-btn" data-tab="backtesting">🔄 Backtesting</button>
+        <button class="tab-btn" data-tab="demo">🎮 Modo Demo</button>
+        <button class="tab-btn" data-tab="sessions">🌍 Sessões</button>
+    </div>
 
-        // ============ INICIALIZAÇÃO ============
-        document.addEventListener('DOMContentLoaded', () => {
-            loadAllApiKeys();
-            setupTabs();
-            updateMarketSession();
-            refreshDashboard();
-            generateWidgetCode();
-            setInterval(updateMarketSession, 60000);
-            setInterval(refreshDashboard, 300000); // Atualiza a cada 5 min
-        });
+    <div class="tab-content">
+        <!-- Dashboard -->
+        <div class="tab-pane active" id="dashboard">
+            <div class="grid grid-2">
+                <div class="card" id="mainSignalCard">
+                    <h3>Sinal Principal</h3><div id="mainSignalContent">Carregando...</div>
+                </div>
+                <div class="card">
+                    <h3>🧮 Calculadora de Posição</h3>
+                    <input type="number" id="accountBalance" placeholder="Saldo ($)" value="10000">
+                    <input type="number" id="riskPercent" placeholder="Risco (%)" value="2">
+                    <input type="number" id="entryPrice" placeholder="Preço de entrada">
+                    <input type="number" id="stopPrice" placeholder="Stop loss">
+                    <button class="btn" onclick="calculatePosition()">Calcular</button>
+                    <div id="positionResult" style="margin-top:10px;"></div>
+                </div>
+            </div>
+            <div class="card"><h3>📋 Sinais Recentes</h3><div id="signalsList">Carregando...</div></div>
+        </div>
 
-        function setupTabs() {
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-                    document.getElementById(btn.dataset.tab).classList.add('active');
-                });
-            });
+        <!-- EMA Cloud -->
+        <div class="tab-pane" id="emacloud">
+            <div class="card"><h2>☁️ Nuvem de Médias Móveis (EMA Cloud)</h2>
+                <select id="cloudPair"><option>EUR_USD</option><option>GBP_USD</option></select>
+                <button class="btn" onclick="renderEMACloud()">Atualizar</button>
+                <div id="cloudResult" style="margin-top:20px;"></div>
+            </div>
+        </div>
+
+        <!-- Padrões -->
+        <div class="tab-pane" id="patterns">
+            <div class="card"><h2>🕯️ Identificação de Candlesticks</h2>
+                <select id="patternPair"><option>EUR_USD</option><option>GBP_USD</option></select>
+                <button class="btn" onclick="detectPatterns()">Detectar</button>
+                <div id="patternResults" style="margin-top:20px;"></div>
+            </div>
+        </div>
+
+        <!-- Volume Profile -->
+        <div class="tab-pane" id="volume">
+            <div class="card"><h2>📊 Volume Profile</h2>
+                <select id="volPair"><option>EUR_USD</option><option>GBP_USD</option></select>
+                <button class="btn" onclick="renderVolumeProfile()">Analisar Volume</button>
+                <div id="volResult" style="margin-top:20px;"></div>
+            </div>
+        </div>
+
+        <!-- Suporte/Resistência -->
+        <div class="tab-pane" id="srlevels">
+            <div class="card"><h2>📐 Suportes e Resistências</h2>
+                <select id="srPair"><option>EUR_USD</option><option>GBP_USD</option></select>
+                <button class="btn" onclick="detectSRLevels()">Detectar Zonas</button>
+                <div id="srResult" style="margin-top:20px;"></div>
+            </div>
+        </div>
+
+        <!-- Confluência -->
+        <div class="tab-pane" id="confluence">
+            <div class="card"><h2>🎯 Sistema de Confluência</h2>
+                <p style="color:#666;">Nota de confiança baseada na concordância de múltiplos indicadores.</p>
+                <select id="confPair"><option>EUR_USD</option><option>GBP_USD</option></select>
+                <button class="btn" onclick="calculateConfluence()">Calcular Confluência</button>
+                <div id="confResult" style="margin-top:20px;"></div>
+            </div>
+        </div>
+
+        <!-- ADX -->
+        <div class="tab-pane" id="adx">
+            <div class="card"><h2>📈 Força de Tendência (ADX)</h2>
+                <select id="adxPair"><option>EUR_USD</option><option>GBP_USD</option></select>
+                <button class="btn" onclick="calculateADX()">Calcular ADX</button>
+                <div id="adxResult" style="margin-top:20px;"></div>
+            </div>
+        </div>
+
+        <!-- Backtesting -->
+        <div class="tab-pane" id="backtesting">
+            <div class="card"><h2>🔄 Backtesting</h2>
+                <select id="btPair"><option>EUR_USD</option></select>
+                <select id="btTimeframe"><option value="H1">1H</option><option value="H4">4H</option></select>
+                <select id="btStrategy"><option value="rsi_macd">RSI+MACD</option></select>
+                <button class="btn" onclick="runBacktest()">Executar</button><div id="btResults" style="margin-top:20px;"></div>
+            </div>
+        </div>
+
+        <!-- Modo Demo -->
+        <div class="tab-pane" id="demo">
+            <div class="card"><h2>🎮 Modo de Treino (Demo)</h2>
+                <p>Simulador com banca virtual e dados reais de mercado.</p>
+                <button class="btn btn-demo" onclick="toggleDemoMode()" id="demoToggleBtn">Ativar Modo Demo</button>
+                <div id="demoStats" style="margin-top:20px;"></div>
+            </div>
+        </div>
+
+        <!-- Sessões -->
+        <div class="tab-pane" id="sessions">
+            <div class="card"><h2>🌍 Sessões de Mercado</h2><div id="sessionInfo"></div></div>
+        </div>
+    </div>
+</div>
+
+<div id="notificationContainer" class="notification-container"></div>
+
+<script>
+    // ============ CONFIGURAÇÃO ============
+    const PAIRS = ['EUR_USD','GBP_USD','USD_JPY','AUD_USD','USD_CAD','EUR_GBP'];
+    let apiKeys = { oanda:'', twelvedata:'', polygon:'' };
+    let activeApis = {};
+    let demoMode = false;
+    let demoAccount = { balance: 10000, pnl: 0, trades: [] };
+    let worker = null;
+    let db = null;
+
+    // ============ PWA ============
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('installBtn').style.display = 'inline-block';
+    });
+    function installPWA() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
         }
-
-        function loadAllApiKeys() {
-            const saved = localStorage.getItem(API_KEYS_STORAGE);
-            if (saved) {
-                apiKeys = JSON.parse(saved);
-                document.getElementById('oandaKey').value = apiKeys.oanda || '';
-                document.getElementById('twelveKey').value = apiKeys.twelvedata || '';
-                document.getElementById('ibkrKey').value = apiKeys.ibkr || '';
-                document.getElementById('fxcmKey').value = apiKeys.fxcm || '';
-                document.getElementById('trademadeKey').value = apiKeys.trademade || '';
-                document.getElementById('polygonKey').value = apiKeys.polygon || '';
-                testAllApis();
-            }
-        }
-
-        function saveAllApiKeys() {
-            apiKeys.oanda = document.getElementById('oandaKey').value.trim();
-            apiKeys.twelvedata = document.getElementById('twelveKey').value.trim();
-            apiKeys.ibkr = document.getElementById('ibkrKey').value.trim();
-            apiKeys.fxcm = document.getElementById('fxcmKey').value.trim();
-            apiKeys.trademade = document.getElementById('trademadeKey').value.trim();
-            apiKeys.polygon = document.getElementById('polygonKey').value.trim();
-            localStorage.setItem(API_KEYS_STORAGE, JSON.stringify(apiKeys));
-            testAllApis();
-            alert('✅ Chaves salvas! Testando conexões...');
-        }
-
-        // ============ TESTE DE APIS ============
-        async function testAPI(provider) {
-            const card = document.getElementById(`card-${provider}`);
-            const dot = card.querySelector('.api-status-dot');
-            
-            card.classList.remove('connected', 'disconnected');
-            card.classList.add('disconnected');
-            dot.classList.remove('online', 'offline');
-            dot.classList.add('offline');
-            
-            try {
-                const result = await testProviderConnection(provider);
-                if (result) {
-                    card.classList.remove('disconnected');
-                    card.classList.add('connected');
-                    dot.classList.remove('offline');
-                    dot.classList.add('online');
-                    activeApis[provider] = true;
-                    console.log(`✅ ${provider} conectado`);
-                }
-            } catch (e) {
-                console.warn(`❌ ${provider}: ${e.message}`);
-                activeApis[provider] = false;
-            }
-            updateActiveSourcesCount();
-        }
-
-        async function testAllApis() {
-            for (const provider of Object.keys(apiKeys)) {
-                if (apiKeys[provider]) {
-                    await testAPI(provider);
-                }
-            }
-        }
-
-        async function testProviderConnection(provider) {
-            const key = apiKeys[provider];
-            if (!key) return false;
-            
-            switch (provider) {
-                case 'oanda':
-                    try {
-                        const resp = await fetch('https://api-fxpractice.oanda.com/v3/accounts',
-                            { headers: { Authorization: `Bearer ${key}` } });
-                        return resp.ok;
-                    } catch { return false; }
-                    
-                case 'twelvedata':
-                    try {
-                        const resp = await fetch(
-                            `https://api.twelvedata.com/quote?symbol=EUR/USD&apikey=${key}`
-                        );
-                        if (resp.ok) {
-                            const data = await resp.json();
-                            return data.status !== 'error';
-                        }
-                    } catch { return false; }
-                    return false;
-                    
-                case 'fxcm':
-                    try {
-                        const resp = await fetch('https://api.fxcm.com/v2/market/quote?symbols=EUR/USD',
-                            { headers: { Authorization: `Bearer ${key}` } });
-                        return resp.ok;
-                    } catch { return false; }
-                    
-                case 'polygon':
-                    try {
-                        const resp = await fetch(
-                            `https://api.polygon.io/v2/aggs/ticker/C:EURUSD/prev?apiKey=${key}`
-                        );
-                        return resp.ok;
-                    } catch { return false; }
-                    
-                case 'trademade':
-                    try {
-                        const resp = await fetch(
-                            `https://marketdata.trademade.com/api/v1/live?currency=EURUSD&api_key=${key}`
-                        );
-                        return resp.ok;
-                    } catch { return false; }
-                    
-                default:
-                    return false;
-            }
-        }
-
-        function updateActiveSourcesCount() {
-            const count = Object.values(activeApis).filter(Boolean).length;
-            document.getElementById('activeSources').textContent = `${count} fontes ativas`;
-            document.getElementById('dataModeBadge').textContent = count > 0 ? 'DADOS REAIS' : 'DADOS SIMULADOS';
-            document.getElementById('dataModeBadge').style.background = count > 0 ? '#2ed573' : '#ffa502';
-        }
-
-        // ============ BUSCA DE DADOS REAIS ============
-        async function fetchRealCandles(pair, timeframe = 'H1', count = 100) {
-            // Tenta múltiplas fontes em ordem de prioridade
-            
-            // 1. Twelve Data
-            if (activeApis.twelvedata) {
-                const candles = await fetchTwelveDataCandles(pair, timeframe, count);
-                if (candles && candles.length >= 50) {
-                    console.log(`📊 Dados de Twelve Data: ${pair}`);
-                    return { candles, source: 'Twelve Data' };
-                }
-            }
-            
-            // 2. OANDA
-            if (activeApis.oanda) {
-                const candles = await fetchOandaCandles(pair, timeframe, count);
-                if (candles && candles.length >= 50) {
-                    console.log(`📊 Dados de OANDA: ${pair}`);
-                    return { candles, source: 'OANDA' };
-                }
-            }
-            
-            // 3. Polygon.io
-            if (activeApis.polygon) {
-                const candles = await fetchPolygonCandles(pair, timeframe, count);
-                if (candles && candles.length >= 50) {
-                    console.log(`📊 Dados de Polygon.io: ${pair}`);
-                    return { candles, source: 'Polygon.io' };
-                }
-            }
-            
-            // 4. FXCM
-            if (activeApis.fxcm) {
-                const candles = await fetchFXCMCandles(pair, timeframe, count);
-                if (candles && candles.length >= 50) {
-                    console.log(`📊 Dados de FXCM: ${pair}`);
-                    return { candles, source: 'FXCM' };
-                }
-            }
-            
-            // 5. TraderMade
-            if (activeApis.trademade) {
-                const candles = await fetchTraderMadeCandles(pair, timeframe, count);
-                if (candles && candles.length >= 50) {
-                    console.log(`📊 Dados de TraderMade: ${pair}`);
-                    return { candles, source: 'TraderMade' };
-                }
-            }
-            
-            console.warn(`⚠️ Nenhuma API disponível para ${pair}. Usando fallback.`);
-            return {
-                candles: generateFallbackCandles(pair, count),
-                source: 'Fallback (Simulado)'
-            };
-        }
-
-        async function fetchOandaCandles(pair, timeframe = 'H1', count = 100) {
-            try {
-                const granularity = { M5: 'M5', M15: 'M15', H1: 'H1', H4: 'H4', D1: 'D' }[timeframe] || 'H1';
-                const resp = await fetch(
-                    `https://api-fxpractice.oanda.com/v3/instruments/${pair}/candles?count=${count}&granularity=${granularity}`,
-                    { headers: { Authorization: `Bearer ${apiKeys.oanda}` } }
-                );
-                if (!resp.ok) return null;
-                const data = await resp.json();
-                return data.candles.map(c => ({
-                    time: new Date(c.time),
-                    open: parseFloat(c.mid.o),
-                    high: parseFloat(c.mid.h),
-                    low: parseFloat(c.mid.l),
-                    close: parseFloat(c.mid.c),
-                    volume: c.volume || 0
+    }
+    if ('serviceWorker' in navigator) {
+        const swCode = `
+            self.addEventListener('install', e => self.skipWaiting());
+            self.addEventListener('activate', e => e.waitUntil(clients.claim()));
+            self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
+            self.addEventListener('push', e => {
+                const data = e.data?.json() || { title: 'Sinal Forex', body: 'Novo sinal detectado!' };
+                e.waitUntil(self.registration.showNotification(data.title, {
+                    body: data.body, icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">📊</text></svg>'
                 }));
-            } catch { return null; }
-        }
+            });
+        `;
+        navigator.serviceWorker.register(
+            URL.createObjectURL(new Blob([swCode], { type: 'application/javascript' }))
+        ).catch(() => {});
+    }
 
-        async function fetchTwelveDataCandles(pair, timeframe = '1h', count = 100) {
-            try {
-                const symbol = pair.replace('_', '/');
-                const interval = { M5: '5min', M15: '15min', H1: '1h', H4: '4h', D1: '1day' }[timeframe] || '1h';
-                const resp = await fetch(
-                    `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=${interval}&outputsize=${count}&apikey=${apiKeys.twelvedata}`
-                );
-                if (!resp.ok) return null;
-                const data = await resp.json();
-                if (data.status === 'error') return null;
-                return data.values.map(v => ({
-                    time: new Date(v.datetime),
-                    open: parseFloat(v.open),
-                    high: parseFloat(v.high),
-                    low: parseFloat(v.low),
-                    close: parseFloat(v.close),
-                    volume: parseFloat(v.volume || 0)
-                })).reverse();
-            } catch { return null; }
+    // ============ NOTIFICAÇÕES PUSH ============
+    async function requestPushPermission() {
+        if ('Notification' in window && Notification.permission === 'default') {
+            const result = await Notification.requestPermission();
+            if (result === 'granted') showNotification('success', 'Notificações', 'Alertas ativados!');
         }
-
-        async function fetchPolygonCandles(pair, timeframe = 'hour', count = 100) {
-            try {
-                const symbol = `C:${pair.replace('_', '')}`;
-                const timespan = { M5: 'minute', M15: 'minute', H1: 'hour', H4: 'hour', D1: 'day' }[timeframe] || 'hour';
-                const multiplier = { M5: 5, M15: 15, H1: 1, H4: 4, D1: 1 }[timeframe] || 1;
-                const from = new Date(Date.now() - count * 3600000).toISOString().split('T')[0];
-                const to = new Date().toISOString().split('T')[0];
-                const resp = await fetch(
-                    `https://api.polygon.io/v2/aggs/ticker/${symbol}/range/${multiplier}/${timespan}/${from}/${to}?limit=${count}&apiKey=${apiKeys.polygon}`
-                );
-                if (!resp.ok) return null;
-                const data = await resp.json();
-                return data.results?.map(r => ({
-                    time: new Date(r.t),
-                    open: r.o, high: r.h, low: r.l, close: r.c,
-                    volume: r.v || 0
-                })) || null;
-            } catch { return null; }
+    }
+    function sendPushNotification(title, body) {
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification(title, { body, icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">📊</text></svg>' });
         }
+    }
 
-        async function fetchFXCMCandles(pair, timeframe = 'H1', count = 100) {
-            try {
-                const symbol = pair.replace('_', '/');
-                const resp = await fetch(
-                    `https://api.fxcm.com/v2/historical?symbol=${symbol}&period=${timeframe}&limit=${count}`,
-                    { headers: { Authorization: `Bearer ${apiKeys.fxcm}` } }
-                );
-                if (!resp.ok) return null;
-                const data = await resp.json();
-                return data.candles?.map(c => ({
-                    time: new Date(c.timestamp),
-                    open: c.open, high: c.high, low: c.low, close: c.close,
-                    volume: c.volume || 0
-                })) || null;
-            } catch { return null; }
-        }
+    // ============ INDEXEDDB ============
+    function openDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open('ForexDB', 1);
+            request.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains('candles')) {
+                    db.createObjectStore('candles', { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains('signals')) {
+                    db.createObjectStore('signals', { keyPath: 'id', autoIncrement: true });
+                }
+            };
+            request.onsuccess = (e) => { db = e.target.result; resolve(db); };
+            request.onerror = () => reject(request.error);
+        });
+    }
+    async function storeCandles(pair, timeframe, candles) {
+        if (!db) await openDB();
+        const tx = db.transaction('candles', 'readwrite');
+        const store = tx.objectStore('candles');
+        const id = `${pair}_${timeframe}`;
+        store.put({ id, pair, timeframe, candles, timestamp: Date.now() });
+    }
+    async function getStoredCandles(pair, timeframe, maxAge = 3600000) {
+        if (!db) await openDB();
+        return new Promise((resolve) => {
+            const tx = db.transaction('candles', 'readonly');
+            const store = tx.objectStore('candles');
+            const request = store.get(`${pair}_${timeframe}`);
+            request.onsuccess = () => {
+                const data = request.result;
+                if (data && Date.now() - data.timestamp < maxAge) resolve(data.candles);
+                else resolve(null);
+            };
+            request.onerror = () => resolve(null);
+        });
+    }
 
-        async function fetchTraderMadeCandles(pair, timeframe = 'hourly', count = 100) {
-            try {
-                const resp = await fetch(
-                    `https://marketdata.trademade.com/api/v1/timeseries?currency=${pair.replace('_', '')}&interval=${timeframe}&limit=${count}&api_key=${apiKeys.trademade}`
-                );
-                if (!resp.ok) return null;
-                const data = await resp.json();
-                return data.quotes?.map(q => ({
-                    time: new Date(q.date),
-                    open: q.open, high: q.high, low: q.low, close: q.close,
-                    volume: 0
-                })) || null;
-            } catch { return null; }
-        }
-
-        function generateFallbackCandles(pair, count) {
-            const bases = { EUR_USD: 1.0850, GBP_USD: 1.2650, USD_JPY: 148.50,
-                AUD_USD: 0.6550, USD_CAD: 1.3550, EUR_GBP: 0.8570 };
-            const base = bases[pair] || 1.0000;
-            const candles = [];
-            let price = base;
-            for (let i = 0; i < count; i++) {
-                const change = (Math.random() - 0.5) * 0.002;
-                const open = price;
-                const close = price + change;
-                candles.push({
-                    time: new Date(Date.now() - (count - i) * 3600000),
-                    open, close,
-                    high: Math.max(open, close) + Math.random() * 0.0005,
-                    low: Math.min(open, close) - Math.random() * 0.0005,
-                    volume: Math.floor(Math.random() * 1000)
-                });
-                price = close;
+    // ============ WEBWORKER ============
+    function initWorker() {
+        if (worker) return;
+        const workerCode = `
+            function calculateRSI(closes, period = 14) {
+                if (closes.length < period + 1) return [];
+                let gains = 0, losses = 0;
+                for (let i = 1; i <= period; i++) {
+                    const diff = closes[i] - closes[i - 1];
+                    if (diff >= 0) gains += diff; else losses -= diff;
+                }
+                let avgGain = gains / period, avgLoss = losses / period;
+                const rsi = [100 - (100 / (1 + avgGain / (avgLoss || 1)))];
+                for (let i = period + 1; i < closes.length; i++) {
+                    const diff = closes[i] - closes[i - 1];
+                    avgGain = (avgGain * (period - 1) + (diff > 0 ? diff : 0)) / period;
+                    avgLoss = (avgLoss * (period - 1) + (diff < 0 ? -diff : 0)) / period;
+                    rsi.push(100 - (100 / (1 + avgGain / (avgLoss || 1))));
+                }
+                return rsi;
             }
-            return candles;
-        }
-
-        // ============ INDICADORES TÉCNICOS ============
-        function calculateRSI(candles, period = 14) {
-            const closes = candles.map(c => c.close);
-            if (closes.length < period + 1) return null;
-            let gains = 0, losses = 0;
-            for (let i = 1; i <= period; i++) {
-                const diff = closes[i] - closes[i - 1];
-                if (diff >= 0) gains += diff; else losses -= diff;
-            }
-            let avgGain = gains / period, avgLoss = losses / period;
-            const rsi = [100 - (100 / (1 + avgGain / (avgLoss || 1)))];
-            for (let i = period + 1; i < closes.length; i++) {
-                const diff = closes[i] - closes[i - 1];
-                avgGain = (avgGain * (period - 1) + (diff > 0 ? diff : 0)) / period;
-                avgLoss = (avgLoss * (period - 1) + (diff < 0 ? -diff : 0)) / period;
-                rsi.push(100 - (100 / (1 + avgGain / (avgLoss || 1))));
-            }
-            return rsi;
-        }
-
-        function calculateMACD(candles, fast = 12, slow = 26, signal = 9) {
-            const closes = candles.map(c => c.close);
-            const ema = (data, period) => {
+            function calculateEMA(data, period) {
                 if (data.length < period) return [];
                 const k = 2 / (period + 1);
                 const result = [data.slice(0, period).reduce((a, b) => a + b) / period];
-                for (let i = period; i < data.length; i++) {
-                    result.push(data[i] * k + result[result.length - 1] * (1 - k));
-                }
+                for (let i = period; i < data.length; i++) result.push(data[i] * k + result[result.length - 1] * (1 - k));
                 return result;
+            }
+            function calculateADX(highs, lows, closes, period = 14) {
+                if (closes.length < period + 1) return null;
+                const tr = [], plusDM = [], minusDM = [];
+                for (let i = 1; i < closes.length; i++) {
+                    const h = highs[i], l = lows[i], pc = closes[i-1];
+                    tr.push(Math.max(h - l, Math.abs(h - pc), Math.abs(l - pc)));
+                    const up = h - highs[i-1], down = lows[i-1] - l;
+                    plusDM.push(up > down && up > 0 ? up : 0);
+                    minusDM.push(down > up && down > 0 ? down : 0);
+                }
+                let atr = tr.slice(0, period).reduce((a, b) => a + b) / period;
+                let pDM = plusDM.slice(0, period).reduce((a, b) => a + b) / period;
+                let mDM = minusDM.slice(0, period).reduce((a, b) => a + b) / period;
+                const adxValues = [];
+                for (let i = period; i < tr.length; i++) {
+                    atr = (atr * (period - 1) + tr[i]) / period;
+                    pDM = (pDM * (period - 1) + plusDM[i]) / period;
+                    mDM = (mDM * (period - 1) + minusDM[i]) / period;
+                    const pDI = (pDM / (atr || 1)) * 100;
+                    const mDI = (mDM / (atr || 1)) * 100;
+                    const dx = Math.abs(pDI - mDI) / ((pDI + mDI) || 1) * 100;
+                    adxValues.push(dx);
+                }
+                const adx = adxValues.length >= period ? adxValues.slice(-period).reduce((a, b) => a + b) / period : adxValues[adxValues.length - 1];
+                return adx;
+            }
+            self.onmessage = function(e) {
+                const { type, data } = e.data;
+                if (type === 'rsi') {
+                    const result = calculateRSI(data);
+                    self.postMessage({ type: 'rsi', result });
+                } else if (type === 'adx') {
+                    const result = calculateADX(data.highs, data.lows, data.closes);
+                    self.postMessage({ type: 'adx', result });
+                }
             };
-            const fastEMA = ema(closes, fast);
-            const slowEMA = ema(closes, slow);
-            const macdLine = [];
-            const offset = fastEMA.length - slowEMA.length;
-            for (let i = 0; i < slowEMA.length; i++) {
-                macdLine.push(fastEMA[offset + i] - slowEMA[i]);
-            }
-            const signalLine = ema(macdLine, signal);
-            const histogram = macdLine.map((m, i) => m - (signalLine[i] || 0));
-            return { macdLine, signalLine, histogram };
+        `;
+        worker = new Worker(URL.createObjectURL(new Blob([workerCode], { type: 'application/javascript' })));
+    }
+
+    // ============ NOTIFICAÇÕES ============
+    function showNotification(type, title, msg, dur = 6000) {
+        const container = document.getElementById('notificationContainer');
+        const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerHTML = `<i class="fas ${icons[type]} toast-icon"></i><div class="toast-content"><div class="toast-title">${title}</div><div class="toast-message">${msg}</div></div><button class="toast-close"><i class="fas fa-times"></i></button>`;
+        container.appendChild(toast);
+        const closeBtn = toast.querySelector('.toast-close');
+        const remove = () => { toast.classList.add('removing'); setTimeout(() => toast.remove(), 300); };
+        closeBtn.addEventListener('click', remove);
+        setTimeout(remove, dur);
+    }
+
+    // ============ API MANAGEMENT ============
+    async function fetchWithTimeout(url, opts = {}, timeout = 10000) {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), timeout);
+        try {
+            const resp = await fetch(url, { ...opts, signal: ctrl.signal });
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            return resp;
+        } finally { clearTimeout(timer); }
+    }
+
+    async function fetchRealCandles(pair, timeframe = 'H1', count = 100) {
+        // Check cache first
+        const cached = await getStoredCandles(pair, timeframe, 300000); // 5 min cache
+        if (cached && cached.length >= count) return { candles: cached, source: 'Cache Local' };
+
+        const errors = [];
+        if (activeApis.twelvedata) {
+            try {
+                const c = await fetchTwelveDataCandles(pair, timeframe, count);
+                if (c?.length >= 50) { await storeCandles(pair, timeframe, c); return { candles: c, source: 'Twelve Data' }; }
+            } catch (e) { errors.push({ api: 'Twelve Data', error: e }); }
         }
-
-        function calculateBollinger(candles, period = 20, dev = 2) {
-            const closes = candles.map(c => c.close);
-            const sma = [], upper = [], lower = [];
-            for (let i = period - 1; i < closes.length; i++) {
-                const slice = closes.slice(i - period + 1, i + 1);
-                const mean = slice.reduce((a, b) => a + b) / period;
-                const std = Math.sqrt(slice.reduce((s, v) => s + (v - mean) ** 2, 0) / period);
-                sma.push(mean);
-                upper.push(mean + dev * std);
-                lower.push(mean - dev * std);
-            }
-            return { sma, upper, lower };
+        if (activeApis.oanda) {
+            try {
+                const c = await fetchOandaCandles(pair, timeframe, count);
+                if (c?.length >= 50) { await storeCandles(pair, timeframe, c); return { candles: c, source: 'OANDA' }; }
+            } catch (e) { errors.push({ api: 'OANDA', error: e }); }
         }
-
-        // ============ PADRÕES DE CANDLESTICK ============
-        function detectCandlestickPatterns(candles) {
-            const patterns = [];
-            if (candles.length < 2) return patterns;
-            const last = candles[candles.length - 1];
-            const prev = candles[candles.length - 2];
-            const body = Math.abs(last.close - last.open);
-            const upperWick = last.high - Math.max(last.open, last.close);
-            const lowerWick = Math.min(last.open, last.close) - last.low;
-            const totalRange = last.high - last.low || 0.00001;
-
-            if (lowerWick > body * 2 && upperWick < body * 0.3)
-                patterns.push({ name: 'Martelo', signal: 'buy', confidence: 70 });
-            if (upperWick > body * 2 && lowerWick < body * 0.3)
-                patterns.push({ name: 'Estrela Cadente', signal: 'sell', confidence: 70 });
-            if (prev.close < prev.open && last.close > last.open && last.open < prev.close && last.close > prev.open)
-                patterns.push({ name: 'Engolfo de Alta', signal: 'buy', confidence: 80 });
-            if (prev.close > prev.open && last.close < last.open && last.open > prev.close && last.close < prev.open)
-                patterns.push({ name: 'Engolfo de Baixa', signal: 'sell', confidence: 80 });
-            if (body < totalRange * 0.1)
-                patterns.push({ name: 'Doji', signal: 'neutral', confidence: 50 });
-            return patterns;
+        if (activeApis.polygon) {
+            try {
+                const c = await fetchPolygonCandles(pair, timeframe, count);
+                if (c?.length >= 50) { await storeCandles(pair, timeframe, c); return { candles: c, source: 'Polygon.io' }; }
+            } catch (e) { errors.push({ api: 'Polygon.io', error: e }); }
         }
+        errors.forEach(e => formatApiError(e.api, e.error));
+        if (errors.length > 0) showNotification('warning', 'Fallback', 'Usando dados simulados.');
+        return { candles: generateFallbackCandles(pair, count), source: 'Simulado' };
+    }
 
-        // ============ BACKTESTING ============
-        async function runBacktest() {
-            const pair = document.getElementById('btPair').value;
-            const timeframe = document.getElementById('btTimeframe').value;
-            const strategy = document.getElementById('btStrategy').value;
-            
-            document.getElementById('btResults').innerHTML = '<p>🔄 Buscando dados reais para backtesting...</p>';
-            
-            const { candles, source } = await fetchRealCandles(pair, timeframe, 200);
-            
-            if (!candles || candles.length < 100) {
-                document.getElementById('btResults').innerHTML = '<p style="color:red;">Dados insuficientes.</p>';
-                return;
-            }
-            
-            const results = backtestStrategy(candles, strategy);
-            const winRate = (results.wins / results.trades * 100) || 0;
-            
-            document.getElementById('btResults').innerHTML = `
-                <h3>📊 Resultados: ${pair.replace('_', '/')} - ${timeframe}</h3>
-                <p>🔌 Fonte: <strong>${source}</strong></p>
-                <p>📋 Estratégia: ${strategy} | Trades: ${results.trades}</p>
-                <p>✅ Wins: ${results.wins} | ❌ Losses: ${results.losses}</p>
-                <p>📈 Win Rate: ${winRate.toFixed(1)}% | 💰 Lucro: $${results.profit.toFixed(2)}</p>
-                <p>📉 Drawdown Máx: ${results.maxDrawdown.toFixed(2)}%</p>
-            `;
-        }
-
-        function backtestStrategy(candles, strategy) {
-            let capital = 10000, trades = 0, wins = 0, losses = 0;
-            let peak = capital, maxDrawdown = 0, position = null;
-            
-            for (let i = 50; i < candles.length; i++) {
-                const slice = candles.slice(i - 50, i);
-                let signal = 0;
-                
-                if (strategy === 'rsi_macd') {
-                    const rsi = calculateRSI(slice);
-                    const macd = calculateMACD(slice);
-                    if (rsi && macd && macd.histogram.length > 0) {
-                        const lr = rsi[rsi.length - 1];
-                        const lh = macd.histogram[macd.histogram.length - 1];
-                        if (lr < 30 && lh > 0) signal = 1;
-                        else if (lr > 70 && lh < 0) signal = -1;
-                    }
-                } else if (strategy === 'ma_cross') {
-                    const sma20 = slice.slice(-20).reduce((a, c) => a + c.close, 0) / 20;
-                    const sma50 = slice.slice(-50).reduce((a, c) => a + c.close, 0) / 50;
-                    if (sma20 > sma50) signal = 1;
-                    else if (sma20 < sma50) signal = -1;
-                } else if (strategy === 'bollinger') {
-                    const bb = calculateBollinger(slice);
-                    if (bb && bb.lower.length > 0) {
-                        const lastClose = slice[slice.length - 1].close;
-                        if (lastClose < bb.lower[bb.lower.length - 1]) signal = 1;
-                        else if (lastClose > bb.upper[bb.upper.length - 1]) signal = -1;
-                    }
-                }
-                
-                if (signal !== 0 && !position) {
-                    position = { type: signal, entry: candles[i].close };
-                    trades++;
-                } else if (position && (signal === -position.type || i === candles.length - 1)) {
-                    const pnl = position.type === 1
-                        ? (candles[i].close - position.entry)
-                        : (position.entry - candles[i].close);
-                    capital += pnl * 1000;
-                    if (pnl > 0) wins++; else losses++;
-                    if (capital > peak) peak = capital;
-                    const dd = (peak - capital) / peak * 100;
-                    if (dd > maxDrawdown) maxDrawdown = dd;
-                    position = null;
-                }
-            }
-            return { trades, wins, losses, profit: capital - 10000, maxDrawdown };
-        }
-
-        // ============ CORRELAÇÃO ============
-        async function calculateCorrelation() {
-            const correlationData = {};
-            for (const pair of PAIRS) {
-                const { candles } = await fetchRealCandles(pair, 'D1', 50);
-                if (candles) correlationData[pair] = candles.map(c => c.close);
-            }
-            const pairs = Object.keys(correlationData);
-            const matrix = [];
-            for (let i = 0; i < pairs.length; i++) {
-                matrix[i] = [];
-                for (let j = 0; j < pairs.length; j++) {
-                    const a = correlationData[pairs[i]];
-                    const b = correlationData[pairs[j]];
-                    const ra = a.slice(1).map((v, idx) => (v - a[idx]) / a[idx]);
-                    const rb = b.slice(1).map((v, idx) => (v - b[idx]) / b[idx]);
-                    const n = Math.min(ra.length, rb.length);
-                    let sa = 0, sb = 0, sab = 0, sa2 = 0, sb2 = 0;
-                    for (let k = 0; k < n; k++) {
-                        sa += ra[k]; sb += rb[k];
-                        sab += ra[k] * rb[k];
-                        sa2 += ra[k] ** 2; sb2 += rb[k] ** 2;
-                    }
-                    const corr = (n * sab - sa * sb) / Math.sqrt((n * sa2 - sa**2) * (n * sb2 - sb**2));
-                    matrix[i][j] = isNaN(corr) ? 0 : corr;
-                }
-            }
-            renderHeatmap(pairs, matrix);
-        }
-
-        function renderHeatmap(pairs, matrix) {
-            const container = document.getElementById('correlationHeatmap');
-            container.innerHTML = '';
-            container.style.gridTemplateColumns = `repeat(${pairs.length}, 1fr)`;
-            for (let i = 0; i < pairs.length; i++) {
-                for (let j = 0; j < pairs.length; j++) {
-                    const value = matrix[i][j];
-                    const intensity = Math.abs(value);
-                    const color = value > 0
-                        ? `rgba(46,213,115,${intensity})`
-                        : `rgba(255,71,87,${intensity})`;
-                    const cell = document.createElement('div');
-                    cell.className = 'heatmap-cell';
-                    cell.style.background = i === j ? '#667eea' : color;
-                    cell.textContent = value.toFixed(2);
-                    cell.title = `${pairs[i]} vs ${pairs[j]}: ${value.toFixed(2)}`;
-                    container.appendChild(cell);
-                }
-            }
-        }
-
-        // ============ MULTI-TIMEFRAME ============
-        async function runMTFAnalysis() {
-            const pair = document.getElementById('mtfPair').value;
-            const timeframes = ['M15', 'H1', 'H4', 'D1'];
-            const results = [];
-            
-            for (const tf of timeframes) {
-                const { candles, source } = await fetchRealCandles(pair, tf, 100);
-                if (!candles || candles.length < 50) continue;
-                const rsi = calculateRSI(candles);
-                const macd = calculateMACD(candles);
-                const lr = rsi ? rsi[rsi.length - 1] : 50;
-                const lh = macd?.histogram[macd.histogram.length - 1] || 0;
-                let signal = 'NEUTRO';
-                if (lr < 30 && lh > 0) signal = 'COMPRA';
-                else if (lr > 70 && lh < 0) signal = 'VENDA';
-                results.push({ timeframe: tf, rsi: lr.toFixed(1), macd: lh.toFixed(5), signal, source });
-            }
-            
-            const buys = results.filter(r => r.signal === 'COMPRA').length;
-            const sells = results.filter(r => r.signal === 'VENDA').length;
-            const consensus = buys > sells ? 'COMPRA' : sells > buys ? 'VENDA' : 'NEUTRO';
-            
-            document.getElementById('mtfResults').innerHTML = `
-                <h3>${pair.replace('_', '/')} — Fonte: ${results[0]?.source || 'N/A'}</h3>
-                ${results.map(r => `
-                    <div class="signal-item ${r.signal === 'COMPRA' ? 'buy' : r.signal === 'VENDA' ? 'sell' : ''}">
-                        <strong>${r.timeframe}</strong> | RSI: ${r.rsi} | MACD: ${r.macd} | ${r.signal}
-                    </div>
-                `).join('')}
-                <div class="card ${consensus === 'COMPRA' ? 'buy' : 'sell'}" style="margin-top:20px;">
-                    <h3>Consenso: <span style="color:${consensus === 'COMPRA' ? '#2ed573' : '#ff4757'}">${consensus}</span></h3>
-                    <p>Compras: ${buys} | Vendas: ${sells}</p>
-                </div>
-            `;
-        }
-
-        // ============ SENTIMENTO ============
-        async function fetchSentiment() {
-            const div = document.getElementById('sentimentData');
-            
-            if (activeApis.oanda) {
-                try {
-                    const resp = await fetch('https://api-fxpractice.oanda.com/v3/accounts/primary/openPositionRatios',
-                        { headers: { Authorization: `Bearer ${apiKeys.oanda}` } });
-                    if (resp.ok) {
-                        const data = await resp.json();
-                        let html = '<h3>📊 Posicionamento OANDA (Real)</h3>';
-                        data.positionRatios.forEach(r => {
-                            const longPct = (parseFloat(r.longPositionFraction) * 100).toFixed(1);
-                            const shortPct = (parseFloat(r.shortPositionFraction) * 100).toFixed(1);
-                            html += `<p>${r.instrument}: 🟢 Long ${longPct}% / 🔴 Short ${shortPct}%</p>`;
-                        });
-                        div.innerHTML = html;
-                        return;
-                    }
-                } catch {}
-            }
-            
-            div.innerHTML = '<p>Configure uma API (OANDA) para ver sentimento real dos traders.</p>';
-        }
-
-        // ============ COMPARADOR ============
-        async function compareStrategies() {
-            const strategies = ['rsi_macd', 'ma_cross', 'bollinger'];
-            const pair = 'EUR_USD';
-            const { candles, source } = await fetchRealCandles(pair, 'H1', 200);
-            
-            if (!candles) {
-                document.getElementById('compareResults').innerHTML = '<p style="color:red;">Sem dados disponíveis.</p>';
-                return;
-            }
-            
-            const results = strategies.map(s => {
-                const res = backtestStrategy(candles, s);
-                return {
-                    strategy: s,
-                    winRate: (res.wins / res.trades * 100).toFixed(1),
-                    profit: res.profit.toFixed(2),
-                    trades: res.trades
-                };
-            });
-            
-            document.getElementById('compareResults').innerHTML = `
-                <h3>⚖️ Comparação — Fonte: ${source}</h3>
-                <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                    ${results.map(r => `
-                        <div class="card" style="flex:1; min-width:200px;">
-                            <h4>${r.strategy}</h4>
-                            <p>Win Rate: ${r.winRate}%</p>
-                            <p>Lucro: $${r.profit}</p>
-                            <p>Trades: ${r.trades}</p>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        // ============ PADRÕES ============
-        async function detectPatterns() {
-            const pair = document.getElementById('patternPair').value;
-            const { candles, source } = await fetchRealCandles(pair, 'H1', 100);
-            if (!candles) {
-                document.getElementById('patternResults').innerHTML = '<p style="color:red;">Sem dados.</p>';
-                return;
-            }
-            const patterns = detectCandlestickPatterns(candles);
-            document.getElementById('patternResults').innerHTML = `
-                <p>Fonte: <strong>${source}</strong></p>
-                ${patterns.length === 0 ? '<p>Nenhum padrão detectado.</p>' :
-                    patterns.map(p => `
-                        <div class="signal-item ${p.signal === 'buy' ? 'buy' : p.signal === 'sell' ? 'sell' : ''}">
-                            <strong>${p.name}</strong> — ${p.signal.toUpperCase()} — Confiança: ${p.confidence}%
-                        </div>
-                    `).join('')
-                }
-            `;
-        }
-
-        // ============ SESSÕES ============
-        function updateMarketSession() {
-            const now = new Date();
-            const hour = now.getUTCHours();
-            let session, activePairs;
-            if (hour >= 7 && hour < 15) { session = 'Europeia 🇪🇺'; activePairs = ['EUR/USD', 'GBP/USD', 'EUR/GBP']; }
-            else if (hour >= 12 && hour < 20) { session = 'Americana 🇺🇸'; activePairs = ['USD/JPY', 'USD/CAD', 'AUD/USD']; }
-            else if (hour >= 0 && hour < 8) { session = 'Asiática 🇯🇵'; activePairs = ['USD/JPY', 'AUD/USD']; }
-            else { session = 'Sobreposição 🌐'; activePairs = ['EUR/USD', 'GBP/USD', 'USD/JPY']; }
-            
-            document.getElementById('sessionInfo').innerHTML = `
-                <h3>Sessão Atual: <span style="color:#2ed573;">${session}</span></h3>
-                <p>Pares mais ativos: <strong>${activePairs.join(', ')}</strong></p>
-                <p style="color:#999; font-size:0.9em;">
-                    Hora UTC: ${String(hour).padStart(2, '0')}:00 | ${now.toLocaleDateString('pt-BR')}
-                </p>
-            `;
-        }
-
-        // ============ CALCULADORA ============
-        function calculatePosition() {
-            const balance = parseFloat(document.getElementById('accountBalance').value);
-            const riskPct = parseFloat(document.getElementById('riskPercent').value);
-            const entry = parseFloat(document.getElementById('entryPrice').value);
-            const stop = parseFloat(document.getElementById('stopPrice').value);
-            
-            if (!balance || !riskPct || !entry || !stop) {
-                document.getElementById('positionResult').innerHTML = '<p style="color:red;">Preencha todos os campos.</p>';
-                return;
-            }
-            
-            const riskAmount = balance * (riskPct / 100);
-            const pipValue = entry < 10 ? 10 : 1000 / entry;
-            const stopPips = Math.abs(entry - stop) / 0.0001;
-            const lotSize = riskAmount / (stopPips * pipValue);
-            
-            document.getElementById('positionResult').innerHTML = `
-                <p>🎯 Lote sugerido: <strong>${lotSize.toFixed(2)}</strong> lotes</p>
-                <p>💵 Risco: $${riskAmount.toFixed(2)} (${riskPct}%)</p>
-                <p>📏 Stop: ${stopPips.toFixed(0)} pips | Valor/pip: $${pipValue.toFixed(2)}</p>
-            `;
-        }
-
-        // ============ DASHBOARD ============
-        async function refreshDashboard() {
-            const { candles, source } = await fetchRealCandles('EUR_USD', 'H1', 100);
-            
-            if (candles && candles.length > 50) {
-                const rsi = calculateRSI(candles);
-                const macd = calculateMACD(candles);
-                const lr = rsi ? rsi[rsi.length - 1] : 50;
-                const lh = macd?.histogram[macd.histogram.length - 1] || 0;
-                let signal = 'NEUTRO';
-                if (lr < 30 && lh > 0) signal = 'COMPRA';
-                else if (lr > 70 && lh < 0) signal = 'VENDA';
-                
-                document.getElementById('mainSignalContent').innerHTML = `
-                    <h4>EUR/USD: <span style="color:${signal === 'COMPRA' ? '#2ed573' : signal === 'VENDA' ? '#ff4757' : '#ffa502'}">${signal}</span></h4>
-                    <p>RSI: ${lr.toFixed(1)} | MACD: ${lh.toFixed(5)}</p>
-                    <p style="font-size:0.8em; color:#999;">Fonte: ${source} | ${new Date().toLocaleTimeString('pt-BR')}</p>
-                `;
-            }
-            
-            // Sinais para todos os pares
-            const signals = [];
-            for (const p of PAIRS) {
-                const { candles: c, source: s } = await fetchRealCandles(p, 'H1', 80);
-                if (c && c.length > 50) {
-                    const r = calculateRSI(c);
-                    const m = calculateMACD(c);
-                    const lr = r ? r[r.length - 1] : 50;
-                    const lh = m?.histogram[m.histogram.length - 1] || 0;
-                    let sig = 'NEUTRO';
-                    if (lr < 30 && lh > 0) sig = 'COMPRA';
-                    else if (lr > 70 && lh < 0) sig = 'VENDA';
-                    signals.push({
-                        pair: p.replace('_', '/'),
-                        signal: sig,
-                        rsi: lr.toFixed(1),
-                        price: c[c.length - 1].close.toFixed(5),
-                        source: s
-                    });
-                }
-            }
-            
-            currentSignals = signals;
-            document.getElementById('signalsList').innerHTML = signals.map(s => `
-                <div class="signal-item ${s.signal === 'COMPRA' ? 'buy' : s.signal === 'VENDA' ? 'sell' : ''}">
-                    <span>${s.pair} — ${s.price}</span>
-                    <span style="margin-left:10px; font-weight:bold; color:${s.signal === 'COMPRA' ? '#2ed573' : '#ff4757'}">${s.signal}</span>
-                    <span class="data-source-tag source-real">${s.source}</span>
-                </div>
-            `).join('');
-        }
-
-        // ============ WIDGET ============
-        function generateWidgetCode() {
-            document.getElementById('widgetCode').textContent = 
-                `<iframe src="${window.location.origin}${window.location.pathname}?widget=1" width="350" height="500" frameborder="0"></iframe>`;
-        }
-
-        // ============ MODAL ============
-        function openModal(content) {
-            document.getElementById('modalContent').innerHTML = content;
-            document.getElementById('tradeModal').classList.add('active');
-        }
-
-        function closeModal() {
-            document.getElementById('tradeModal').classList.remove('active');
-        }
-
-        document.getElementById('tradeModal').addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) closeModal();
+    async function fetchOandaCandles(p, tf, n) {
+        const g = { M5:'M5', M15:'M15', H1:'H1', H4:'H4', D1:'D' }[tf] || 'H1';
+        const r = await fetchWithTimeout(`https://api-fxpractice.oanda.com/v3/instruments/${p}/candles?count=${n}&granularity=${g}`, { headers: { Authorization: `Bearer ${apiKeys.oanda}` } });
+        const d = await r.json();
+        return d.candles.map(c => ({ time: new Date(c.time), open: +c.mid.o, high: +c.mid.h, low: +c.mid.l, close: +c.mid.c, volume: c.volume || 0 }));
+    }
+    async function fetchTwelveDataCandles(p, tf, n) {
+        const s = p.replace('_','/');
+        const i = { M5:'5min', M15:'15min', H1:'1h', H4:'4h', D1:'1day' }[tf] || '1h';
+        const r = await fetchWithTimeout(`https://api.twelvedata.com/time_series?symbol=${s}&interval=${i}&outputsize=${n}&apikey=${apiKeys.twelvedata}`);
+        const d = await r.json();
+        if (d.status === 'error') throw new Error(d.message);
+        return d.values.map(v => ({ time: new Date(v.datetime), open: +v.open, high: +v.high, low: +v.low, close: +v.close, volume: +v.volume || 0 })).reverse();
+    }
+    async function fetchPolygonCandles(p, tf, n) {
+        const s = `C:${p.replace('_','')}`;
+        const ts = { M5:'minute', H1:'hour', H4:'hour', D1:'day' }[tf] || 'hour';
+        const m = { M5:5, H1:1, H4:4, D1:1 }[tf] || 1;
+        const to = new Date().toISOString().split('T')[0];
+        const from = new Date(Date.now() - n * 86400000).toISOString().split('T')[0];
+        const r = await fetchWithTimeout(`https://api.polygon.io/v2/aggs/ticker/${s}/range/${m}/${ts}/${from}/${to}?limit=${n}&apiKey=${apiKeys.polygon}`);
+        const d = await r.json();
+        return d.results?.map(r => ({ time: new Date(r.t), open: r.o, high: r.h, low: r.l, close: r.c, volume: r.v || 0 })) || null;
+    }
+    function generateFallbackCandles(p, n) {
+        const b = { EUR_USD:1.085, GBP_USD:1.265, USD_JPY:148.5, AUD_USD:0.655, USD_CAD:1.355, EUR_GBP:0.857 };
+        const base = b[p] || 1; let price = base;
+        return Array.from({ length: n }, (_, i) => {
+            const ch = (Math.random() - 0.5) * 0.002;
+            const o = price, c = o + ch;
+            price = c;
+            return { time: new Date(Date.now() - (n - i) * 3600000), open: o, close: c, high: Math.max(o, c) + Math.random() * 0.0005, low: Math.min(o, c) - Math.random() * 0.0005, volume: Math.floor(Math.random() * 1000) };
         });
+    }
+    function formatApiError(api, e) { showNotification('error', `Falha na ${api}`, e.message?.substring(0, 100) || 'Erro desconhecido'); }
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeModal();
+    // ============ INDICADORES ============
+    function calculateRSI(candles, period = 14) {
+        const closes = candles.map(c => c.close);
+        if (closes.length < period + 1) return [];
+        let gains = 0, losses = 0;
+        for (let i = 1; i <= period; i++) { const d = closes[i] - closes[i-1]; if (d >= 0) gains += d; else losses -= d; }
+        let ag = gains / period, al = losses / period;
+        const rsi = [100 - (100 / (1 + ag / (al || 1)))];
+        for (let i = period + 1; i < closes.length; i++) {
+            const d = closes[i] - closes[i-1];
+            ag = (ag * (period - 1) + (d > 0 ? d : 0)) / period;
+            al = (al * (period - 1) + (d < 0 ? -d : 0)) / period;
+            rsi.push(100 - (100 / (1 + ag / (al || 1))));
+        }
+        return rsi;
+    }
+    function calculateMACD(candles, f = 12, s = 26, sig = 9) {
+        const closes = candles.map(c => c.close);
+        const ema = (data, p) => {
+            if (data.length < p) return [];
+            const k = 2 / (p + 1);
+            const r = [data.slice(0, p).reduce((a, b) => a + b) / p];
+            for (let i = p; i < data.length; i++) r.push(data[i] * k + r[r.length - 1] * (1 - k));
+            return r;
+        };
+        const fe = ema(closes, f), se = ema(closes, s);
+        const ml = [], offset = fe.length - se.length;
+        for (let i = 0; i < se.length; i++) ml.push(fe[offset + i] - se[i]);
+        const sl = ema(ml, sig);
+        const hist = ml.map((m, i) => m - (sl[i] || 0));
+        return { macdLine: ml, signalLine: sl, histogram: hist };
+    }
+    function calculateBollinger(candles, period = 20, dev = 2) {
+        const closes = candles.map(c => c.close);
+        const sma = [], upper = [], lower = [];
+        for (let i = period - 1; i < closes.length; i++) {
+            const slice = closes.slice(i - period + 1, i + 1);
+            const mean = slice.reduce((a, b) => a + b) / period;
+            const std = Math.sqrt(slice.reduce((s, v) => s + (v - mean) ** 2, 0) / period);
+            sma.push(mean); upper.push(mean + dev * std); lower.push(mean - dev * std);
+        }
+        return { sma, upper, lower };
+    }
+    function calculateEMA(data, period) {
+        if (data.length < period) return [];
+        const k = 2 / (period + 1);
+        const r = [data.slice(0, period).reduce((a, b) => a + b) / period];
+        for (let i = period; i < data.length; i++) r.push(data[i] * k + r[r.length - 1] * (1 - k));
+        return r;
+    }
+
+    // ============ ADX ============
+    function calculateADXFull(candles, period = 14) {
+        const highs = candles.map(c => c.high), lows = candles.map(c => c.low), closes = candles.map(c => c.close);
+        if (closes.length < period + 1) return null;
+        const tr = [], plusDM = [], minusDM = [];
+        for (let i = 1; i < closes.length; i++) {
+            tr.push(Math.max(highs[i] - lows[i], Math.abs(highs[i] - closes[i-1]), Math.abs(lows[i] - closes[i-1])));
+            const up = highs[i] - highs[i-1], down = lows[i-1] - lows[i];
+            plusDM.push(up > down && up > 0 ? up : 0);
+            minusDM.push(down > up && down > 0 ? down : 0);
+        }
+        let atr = tr.slice(0, period).reduce((a, b) => a + b) / period;
+        let pDM = plusDM.slice(0, period).reduce((a, b) => a + b) / period;
+        let mDM = minusDM.slice(0, period).reduce((a, b) => a + b) / period;
+        const adxValues = [];
+        for (let i = period; i < tr.length; i++) {
+            atr = (atr * (period - 1) + tr[i]) / period;
+            pDM = (pDM * (period - 1) + plusDM[i]) / period;
+            mDM = (mDM * (period - 1) + minusDM[i]) / period;
+            const pDI = (pDM / (atr || 1)) * 100, mDI = (mDM / (atr || 1)) * 100;
+            const dx = Math.abs(pDI - mDI) / ((pDI + mDI) || 1) * 100;
+            adxValues.push(dx);
+        }
+        const adx = adxValues.slice(-period).reduce((a, b) => a + b) / period;
+        return { adx, pDI: (pDM / (atr || 1)) * 100, mDI: (mDM / (atr || 1)) * 100 };
+    }
+
+    // ============ EMA CLOUD ============
+    async function renderEMACloud() {
+        const pair = document.getElementById('cloudPair').value;
+        const { candles, source } = await fetchRealCandles(pair, 'H1', 100);
+        if (!candles?.length) { document.getElementById('cloudResult').innerHTML = '<p style="color:red;">Sem dados.</p>'; return; }
+        const closes = candles.map(c => c.close);
+        const periods = [8, 13, 21, 34, 55];
+        const emas = periods.map(p => calculateEMA(closes, p));
+        const lastValues = emas.map(e => e[e.length - 1] || 0);
+        const allBullish = lastValues.every((v, i) => i === 0 || v > lastValues[i - 1]);
+        const allBearish = lastValues.every((v, i) => i === 0 || v < lastValues[i - 1]);
+        let trend = 'Neutro', color = '#ffa502';
+        if (allBullish) { trend = 'Tendência de Alta ☁️'; color = '#2ed573'; }
+        else if (allBearish) { trend = 'Tendência de Baixa ☁️'; color = '#ff4757'; }
+        const cloudPercent = Math.min(100, Math.max(0, ((lastValues[0] - lastValues[lastValues.length - 1]) / lastValues[lastValues.length - 1]) * 10000 + 50));
+        document.getElementById('cloudResult').innerHTML = `
+            <p>Fonte: <strong>${source}</strong> | ${pair.replace('_','/')}</p>
+            <p>Preço Atual: <strong>${closes[closes.length - 1].toFixed(5)}</strong></p>
+            <div class="ema-cloud-container"><div class="ema-cloud-fill" style="height:${cloudPercent}%;"></div><div class="ema-cloud-label" style="color:${color};">${trend}</div></div>
+            <p>EMAs (${periods.join(', ')}): ${lastValues.map(v => v.toFixed(5)).join(' | ')}</p>
+            <p style="font-size:0.8em; color:#999;">Nuvem alinhada = tendência forte. EMAs entrelaçadas = consolidação.</p>
+        `;
+    }
+
+    // ============ PADRÕES DE CANDLESTICK ============
+    async function detectPatterns() {
+        const pair = document.getElementById('patternPair').value;
+        const { candles, source } = await fetchRealCandles(pair, 'H1', 100);
+        if (!candles?.length) { document.getElementById('patternResults').innerHTML = '<p style="color:red;">Sem dados.</p>'; return; }
+        const patterns = [];
+        for (let i = 2; i < candles.length; i++) {
+            const p2 = candles[i-2], p1 = candles[i-1], c = candles[i];
+            const body = Math.abs(c.close - c.open), total = c.high - c.low || 0.00001;
+            const uw = c.high - Math.max(c.open, c.close), lw = Math.min(c.open, c.close) - c.low;
+            // Martelo
+            if (lw > body * 2 && uw < body * 0.3) patterns.push({ name: '🔨 Martelo', signal: 'buy', confidence: 70, price: c.close });
+            // Estrela Cadente
+            if (uw > body * 2 && lw < body * 0.3) patterns.push({ name: '🌠 Estrela Cadente', signal: 'sell', confidence: 70, price: c.close });
+            // Engolfo de Alta
+            if (p1.close < p1.open && c.close > c.open && c.open < p1.close && c.close > p1.open)
+                patterns.push({ name: '🟢 Engolfo de Alta', signal: 'buy', confidence: 85, price: c.close });
+            // Engolfo de Baixa
+            if (p1.close > p1.open && c.close < c.open && c.open > p1.close && c.close < p1.open)
+                patterns.push({ name: '🔴 Engolfo de Baixa', signal: 'sell', confidence: 85, price: c.close });
+            // Estrela da Manhã
+            if (p2.close < p2.open && body < total * 0.3 && p1.close < p1.open && Math.abs(p1.close - p1.open) > total * 0.5)
+                patterns.push({ name: '🌟 Estrela da Manhã', signal: 'buy', confidence: 75, price: c.close });
+            // Estrela da Noite
+            if (p2.close > p2.open && body < total * 0.3 && p1.close > p1.open && Math.abs(p1.close - p1.open) > total * 0.5)
+                patterns.push({ name: '💫 Estrela da Noite', signal: 'sell', confidence: 75, price: c.close });
+            // Doji
+            if (body < total * 0.1) patterns.push({ name: '➖ Doji', signal: 'neutral', confidence: 50, price: c.close });
+        }
+        const recent = patterns.slice(-8).reverse();
+        document.getElementById('patternResults').innerHTML = `
+            <p>Fonte: <strong>${source}</strong></p>
+            ${recent.length === 0 ? '<p>Nenhum padrão detectado.</p>' : recent.map(p => `
+                <div class="signal-item ${p.signal === 'buy' ? 'buy' : p.signal === 'sell' ? 'sell' : ''}">
+                    <strong>${p.name}</strong> @ ${p.price.toFixed(5)} — ${p.signal.toUpperCase()} (${p.confidence}%)
+                </div>
+            `).join('')}
+        `;
+    }
+
+    // ============ VOLUME PROFILE ============
+    async function renderVolumeProfile() {
+        const pair = document.getElementById('volPair').value;
+        const { candles, source } = await fetchRealCandles(pair, 'H1', 100);
+        if (!candles?.length) { document.getElementById('volResult').innerHTML = '<p style="color:red;">Sem dados.</p>'; return; }
+        const priceMin = Math.min(...candles.map(c => c.low)), priceMax = Math.max(...candles.map(c => c.high));
+        const zones = 15, zoneSize = (priceMax - priceMin) / zones;
+        const volumeZones = Array(zones).fill(0);
+        candles.forEach(c => {
+            const idx = Math.min(zones - 1, Math.floor((c.close - priceMin) / zoneSize));
+            volumeZones[idx] += c.volume || 1;
         });
+        const maxVol = Math.max(...volumeZones);
+        const pocIndex = volumeZones.indexOf(maxVol);
+        const pocPrice = priceMin + zoneSize * (pocIndex + 0.5);
+        document.getElementById('volResult').innerHTML = `
+            <p>Fonte: <strong>${source}</strong> | Faixa: ${priceMin.toFixed(5)} - ${priceMax.toFixed(5)}</p>
+            <p>POC (Point of Control): <strong>${pocPrice.toFixed(5)}</strong> — zona de maior volume</p>
+            <div class="volume-profile-bar">
+                ${volumeZones.map((v, i) => `<div class="vp-bar" style="height:${(v / maxVol) * 100}%;${i === pocIndex ? 'background:#ff4757;' : ''}" title="${(priceMin + zoneSize * i).toFixed(5)}: ${v}"></div>`).join('')}
+            </div>
+            <p style="font-size:0.8em; color:#999; margin-top:5px;">Barras: volume por nível de preço. Vermelho = POC.</p>
+        `;
+    }
 
-        // ============ INICIALIZAÇÃO FINAL ============
-        testAllApis();
-        updateActiveSourcesCount();
+    // ============ SUPORTE & RESISTÊNCIA ============
+    async function detectSRLevels() {
+        const pair = document.getElementById('srPair').value;
+        const { candles, source } = await fetchRealCandles(pair, 'H1', 100);
+        if (!candles?.length) { document.getElementById('srResult').innerHTML = '<p style="color:red;">Sem dados.</p>'; return; }
+        const pivots = [];
+        for (let i = 5; i < candles.length - 5; i++) {
+            const slice = candles.slice(i - 5, i + 6);
+            const c = candles[i];
+            if (c.high === Math.max(...slice.map(s => s.high))) pivots.push({ type: 'resistance', price: c.high, strength: 1 });
+            if (c.low === Math.min(...slice.map(s => s.low))) pivots.push({ type: 'support', price: c.low, strength: 1 });
+        }
+        // Agrupar zonas próximas
+        const zones = [];
+        pivots.forEach(p => {
+            const existing = zones.find(z => z.type === p.type && Math.abs(z.price - p.price) / p.price < 0.002);
+            if (existing) { existing.price = (existing.price * existing.strength + p.price) / (existing.strength + 1); existing.strength++; }
+            else zones.push({ ...p });
+        });
+        zones.sort((a, b) => b.strength - a.strength);
+        const currentPrice = candles[candles.length - 1].close;
+        document.getElementById('srResult').innerHTML = `
+            <p>Fonte: <strong>${source}</strong> | Preço Atual: ${currentPrice.toFixed(5)}</p>
+            ${zones.slice(0, 10).map(z => `
+                <span class="sr-zone ${z.type === 'support' ? 'sr-support' : 'sr-resistance'}">
+                    ${z.type === 'support' ? '🟢' : '🔴'} ${z.price.toFixed(5)} (${z.strength}x)
+                </span>
+            `).join(' ')}
+            <p style="font-size:0.8em; color:#999; margin-top:8px;">Zonas com mais toques = mais fortes.</p>
+        `;
+    }
+
+    // ============ CONFLUÊNCIA ============
+    async function calculateConfluence() {
+        const pair = document.getElementById('confPair').value;
+        const { candles, source } = await fetchRealCandles(pair, 'H1', 100);
+        if (!candles?.length) { document.getElementById('confResult').innerHTML = '<p style="color:red;">Sem dados.</p>'; return; }
+        const rsi = calculateRSI(candles), macd = calculateMACD(candles), bb = calculateBollinger(candles);
+        const lr = rsi[rsi.length - 1] || 50, lh = macd?.histogram[macd.histogram.length - 1] || 0;
+        const lastClose = candles[candles.length - 1].close;
+        const lastBBLower = bb?.lower[bb.lower.length - 1], lastBBUpper = bb?.upper[bb.upper.length - 1];
+        let score = 0, total = 5, direction = 'NEUTRO';
+        // RSI
+        if (lr < 30) { score++; direction = 'COMPRA'; } else if (lr > 70) { score++; direction = 'VENDA'; }
+        // MACD
+        if (lh > 0.0003) { score++; if (direction === 'NEUTRO') direction = 'COMPRA'; else if (direction === 'COMPRA') score++; }
+        else if (lh < -0.0003) { score++; if (direction === 'NEUTRO') direction = 'VENDA'; else if (direction === 'VENDA') score++; }
+        // Bollinger
+        if (lastBBLower && lastClose < lastBBLower) { score++; if (direction === 'COMPRA') score++; }
+        if (lastBBUpper && lastClose > lastBBUpper) { score++; if (direction === 'VENDA') score++; }
+        // ADX
+        const adxData = calculateADXFull(candles);
+        if (adxData && adxData.adx > 25) { score++; total++; }
+        const confPct = Math.round((score / total) * 100);
+        const confClass = confPct >= 70 ? 'confluence-high' : confPct >= 40 ? 'confluence-medium' : 'confluence-low';
+        document.getElementById('confResult').innerHTML = `
+            <p>Fonte: <strong>${source}</strong> | ${pair.replace('_','/')}</p>
+            <h3>Direção: <span style="color:${direction === 'COMPRA' ? '#2ed573' : '#ff4757'}">${direction}</span></h3>
+            <p>Nota de Confluência: <span class="confluence-score ${confClass}">${confPct}%</span></p>
+            <p>Indicadores analisados: RSI (${lr.toFixed(1)}), MACD (${lh.toFixed(5)}), Bollinger, ADX (${adxData?.adx?.toFixed(1) || 'N/A'})</p>
+            <p style="font-size:0.8em; color:#999;">Score: ${score}/${total} indicadores concordam.</p>
+        `;
+    }
+
+    // ============ ADX ============
+    async function calculateADX() {
+        const pair = document.getElementById('adxPair').value;
+        const { candles, source } = await fetchRealCandles(pair, 'H1', 100);
+        if (!candles?.length) { document.getElementById('adxResult').innerHTML = '<p style="color:red;">Sem dados.</p>'; return; }
+        const adxData = calculateADXFull(candles);
+        if (!adxData) { document.getElementById('adxResult').innerHTML = '<p style="color:red;">Dados insuficientes.</p>'; return; }
+        const { adx, pDI, mDI } = adxData;
+        const strength = adx > 40 ? 'Tendência Muito Forte' : adx > 25 ? 'Tendência Forte' : adx > 20 ? 'Tendência Fraca' : 'Lateral/Consolidação';
+        const color = adx > 25 ? (pDI > mDI ? '#2ed573' : '#ff4757') : '#ffa502';
+        document.getElementById('adxResult').innerHTML = `
+            <p>Fonte: <strong>${source}</strong> | ${pair.replace('_','/')}</p>
+            <h3>ADX: <span style="color:${color};">${adx.toFixed(1)}</span></h3>
+            <p>+DI: ${pDI.toFixed(1)} | -DI: ${mDI.toFixed(1)}</p>
+            <div class="adx-meter"><div class="adx-fill" style="width:${Math.min(100, adx)}%;background:${adx > 25 ? (pDI > mDI ? '#2ed573' : '#ff4757') : '#ffa502'};"></div></div>
+            <p>Diagnóstico: <strong>${strength}</strong> | ${adx > 25 ? (pDI > mDI ? 'Tendência de Alta' : 'Tendência de Baixa') : 'Sem tendência definida'}</p>
+            <p style="font-size:0.8em; color:#999;">ADX > 25 = tendência | ADX > 40 = muito forte | ADX < 20 = lateral</p>
+        `;
+    }
+
+    // ============ BACKTESTING ============
+    async function runBacktest() {
+        const pair = document.getElementById('btPair').value, tf = document.getElementById('btTimeframe').value;
+        document.getElementById('btResults').innerHTML = '<p>🔄 Buscando dados reais...</p>';
+        const { candles, source } = await fetchRealCandles(pair, tf, 200);
+        if (!candles?.length) { document.getElementById('btResults').innerHTML = '<p style="color:red;">Sem dados.</p>'; return; }
+        let capital = 10000, trades = 0, wins = 0, losses = 0, peak = capital, maxDD = 0, pos = null;
+        for (let i = 50; i < candles.length; i++) {
+            const slice = candles.slice(i - 50, i);
+            const rsi = calculateRSI(slice), macd = calculateMACD(slice);
+            let sig = 0;
+            if (rsi && macd) {
+                const lr = rsi[rsi.length - 1], lh = macd.histogram[macd.histogram.length - 1];
+                if (lr < 30 && lh > 0) sig = 1; else if (lr > 70 && lh < 0) sig = -1;
+            }
+            if (sig !== 0 && !pos) { pos = { type: sig, entry: candles[i].close }; trades++; }
+            else if (pos && (sig === -pos.type || i === candles.length - 1)) {
+                const pnl = pos.type === 1 ? (candles[i].close - pos.entry) : (pos.entry - candles[i].close);
+                capital += pnl * 1000;
+                if (pnl > 0) wins++; else losses++;
+                if (capital > peak) peak = capital;
+                const dd = (peak - capital) / peak * 100; if (dd > maxDD) maxDD = dd;
+                pos = null;
+            }
+        }
+        const wr = (wins / trades * 100) || 0;
+        document.getElementById('btResults').innerHTML = `
+            <p>Fonte: <strong>${source}</strong> | ${pair.replace('_','/')} ${tf}</p>
+            <p>Trades: ${trades} | ✅ ${wins} | ❌ ${losses} | WR: ${wr.toFixed(1)}%</p>
+            <p>Lucro: $${(capital - 10000).toFixed(2)} | Drawdown Máx: ${maxDD.toFixed(2)}%</p>
+        `;
+    }
+
+    // ============ MODO DEMO ============
+    function toggleDemoMode() {
+        demoMode = !demoMode;
+        document.getElementById('demoBanner').classList.toggle('active', demoMode);
+        document.getElementById('demoToggleBtn').textContent = demoMode ? 'Desativar Modo Demo' : 'Ativar Modo Demo';
+        document.getElementById('demoToggleBtn').style.background = demoMode ? '#666' : '';
+        if (demoMode) {
+            demoAccount = { balance: 10000, pnl: 0, trades: [] };
+            updateDemoUI();
+        }
+    }
+    function updateDemoUI() {
+        document.getElementById('demoBalance').textContent = demoAccount.balance.toFixed(2);
+        document.getElementById('demoPnL').textContent = demoAccount.pnl.toFixed(2);
+        document.getElementById('demoPnL').style.color = demoAccount.pnl >= 0 ? '#2ed573' : '#ff4757';
+        document.getElementById('demoStats').innerHTML = `
+            <p>Trades: ${demoAccount.trades.length} | Lucro: $${demoAccount.pnl.toFixed(2)}</p>
+            ${demoAccount.trades.slice(-5).reverse().map(t => `<p style="font-size:0.85em;">${t.type} ${t.pair} @ ${t.entry.toFixed(5)} → ${t.exit.toFixed(5)} | ${t.pnl >= 0 ? '✅' : '❌'} $${t.pnl.toFixed(2)}</p>`).join('')}
+        `;
+    }
+    function executeDemoTrade(pair, signal, entry, sl, tp) {
+        if (!demoMode) return;
+        const risk = 100; // $100 risk per trade
+        const exit = signal === 'COMPRA' ? tp : sl; // Simplified
+        const pnl = signal === 'COMPRA' ? (exit - entry) * 10000 : (entry - exit) * 10000;
+        demoAccount.trades.push({ pair, type: signal, entry, exit, pnl, time: new Date() });
+        demoAccount.pnl += pnl;
+        demoAccount.balance += pnl;
+        updateDemoUI();
+        if (pnl > 0) sendPushNotification('Trade Lucrativo!', `${pair}: +$${pnl.toFixed(2)}`);
+    }
+
+    // ============ SESSÕES ============
+    function updateMarketSession() {
+        const now = new Date(), h = now.getUTCHours(), d = now.getUTCDay();
+        const isWeekend = d === 0 || d === 6;
+        const londonOpen = h >= 7 && h < 15 && !isWeekend;
+        const nyOpen = h >= 12 && h < 20 && !isWeekend;
+        const lb = document.getElementById('londonBadge'), nb = document.getElementById('nyBadge');
+        lb.classList.toggle('active-session', londonOpen);
+        nb.classList.toggle('active-session', nyOpen);
+        lb.querySelector('.session-dot').style.opacity = londonOpen ? '1' : '0.3';
+        nb.querySelector('.session-dot').style.opacity = nyOpen ? '1' : '0.3';
+        let session = 'Mercado Fechado', activePairs = [];
+        if (londonOpen && nyOpen) { session = 'Sobreposição Londres + NY 🔥'; activePairs = ['EUR/USD','GBP/USD','USD/JPY']; }
+        else if (londonOpen) { session = 'Sessão Europeia 🇪🇺'; activePairs = ['EUR/USD','GBP/USD','EUR/GBP']; }
+        else if (nyOpen) { session = 'Sessão Americana 🇺🇸'; activePairs = ['USD/JPY','USD/CAD','AUD/USD']; }
+        else if (h >= 0 && h < 8 && !isWeekend) { session = 'Sessão Asiática 🇯🇵'; activePairs = ['USD/JPY','AUD/USD']; }
+        document.getElementById('sessionInfo').innerHTML = `
+            <h3>${session}</h3>
+            <p>Pares mais ativos: <strong>${activePairs.join(', ') || 'Nenhum'}</strong></p>
+            <p>UTC: ${String(h).padStart(2,'0')}:00 | ${now.toLocaleDateString('pt-BR')}</p>
+        `;
+    }
+
+    // ============ CALCULADORA ============
+    function calculatePosition() {
+        const bal = +document.getElementById('accountBalance').value, rp = +document.getElementById('riskPercent').value;
+        const entry = +document.getElementById('entryPrice').value, stop = +document.getElementById('stopPrice').value;
+        if (!bal || !rp || !entry || !stop) return;
+        const riskAmt = bal * (rp / 100);
+        const pipVal = entry < 10 ? 10 : 1000 / entry;
+        const stopPips = Math.abs(entry - stop) / 0.0001;
+        const lot = riskAmt / (stopPips * pipVal);
+        document.getElementById('positionResult').innerHTML = `
+            <p>🎯 Lote: <strong>${lot.toFixed(2)}</strong> | Risco: $${riskAmt.toFixed(2)} | Stop: ${stopPips.toFixed(0)} pips</p>
+        `;
+    }
+
+    // ============ DASHBOARD ============
+    async function refreshDashboard() {
+        const { candles, source } = await fetchRealCandles('EUR_USD', 'H1', 100);
+        if (candles?.length > 50) {
+            const rsi = calculateRSI(candles), macd = calculateMACD(candles);
+            const lr = rsi[rsi.length - 1] || 50, lh = macd?.histogram[macd.histogram.length - 1] || 0;
+            let sig = 'NEUTRO';
+            if (lr < 30 && lh > 0) sig = 'COMPRA'; else if (lr > 70 && lh < 0) sig = 'VENDA';
+            document.getElementById('mainSignalContent').innerHTML = `
+                <h4>EUR/USD: <span style="color:${sig==='COMPRA'?'#2ed573':'#ff4757'}">${sig}</span></h4>
+                <p>RSI: ${lr.toFixed(1)} | MACD: ${lh.toFixed(5)} | <span class="source-real">${source}</span></p>
+            `;
+            if (demoMode && sig !== 'NEUTRO') {
+                const lastPrice = candles[candles.length - 1].close;
+                executeDemoTrade('EUR/USD', sig, lastPrice, lastPrice * 0.998, lastPrice * 1.004);
+            }
+        }
+    }
+
+    // ============ INIT ============
+    document.addEventListener('DOMContentLoaded', async () => {
+        const saved = localStorage.getItem('forex_pro_api_keys');
+        if (saved) {
+            apiKeys = JSON.parse(saved);
+            document.getElementById('oandaKey').value = apiKeys.oanda || '';
+            document.getElementById('twelveKey').value = apiKeys.twelvedata || '';
+            document.getElementById('polygonKey').value = apiKeys.polygon || '';
+        }
+        await openDB();
+        initWorker();
+        requestPushPermission();
+        setupTabs();
         updateMarketSession();
-        generateWidgetCode();
-    </script>
+        refreshDashboard();
+        setInterval(updateMarketSession, 60000);
+        setInterval(refreshDashboard, 300000);
+    });
+
+    function setupTabs() {
+        document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+            b.classList.add('active');
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(b.dataset.tab).classList.add('active');
+        }));
+    }
+    function saveAllApiKeys() {
+        apiKeys.oanda = document.getElementById('oandaKey').value.trim();
+        apiKeys.twelvedata = document.getElementById('twelveKey').value.trim();
+        apiKeys.polygon = document.getElementById('polygonKey').value.trim();
+        localStorage.setItem('forex_pro_api_keys', JSON.stringify(apiKeys));
+        showNotification('success', 'Chaves Salvas', 'Configurações armazenadas.');
+    }
+    async function testAPI(provider) {
+        const card = document.getElementById(`card-${provider}`), dot = card.querySelector('.api-status-dot');
+        try {
+            if (provider === 'oanda') { await fetchWithTimeout('https://api-fxpractice.oanda.com/v3/accounts', { headers: { Authorization: `Bearer ${apiKeys.oanda}` } }); }
+            else if (provider === 'twelvedata') {
+                const r = await fetchWithTimeout(`https://api.twelvedata.com/quote?symbol=EUR/USD&apikey=${apiKeys.twelvedata}`);
+                const d = await r.json(); if (d.status === 'error') throw new Error(d.message);
+            } else if (provider === 'polygon') { await fetchWithTimeout(`https://api.polygon.io/v2/aggs/ticker/C:EURUSD/prev?apiKey=${apiKeys.polygon}`); }
+            card.classList.add('connected'); card.classList.remove('disconnected');
+            dot.classList.add('online'); dot.classList.remove('offline');
+            activeApis[provider] = true;
+            showNotification('success', `${provider} Online`, 'Conectado!');
+        } catch (e) {
+            card.classList.add('disconnected'); card.classList.remove('connected');
+            dot.classList.add('offline'); dot.classList.remove('online');
+            activeApis[provider] = false;
+            formatApiError(provider, e);
+        }
+        const count = Object.values(activeApis).filter(Boolean).length;
+        document.getElementById('activeSources').textContent = `${count} fontes ativas`;
+        document.getElementById('dataModeBadge').textContent = count > 0 ? 'DADOS REAIS' : 'DADOS SIMULADOS';
+        document.getElementById('dataModeBadge').style.background = count > 0 ? '#2ed573' : '#ffa502';
+    }
+</script>
 </body>
     </html>
