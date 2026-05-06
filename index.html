@@ -1,0 +1,1808 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sinais Forex Pro - Análise Técnica</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --header-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            --buy-color: #2ed573;
+            --sell-color: #ff4757;
+            --neutral-color: #ffa502;
+            --bg-light: #f8f9fa;
+            --border-color: #e0e0e0;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --shadow-md: 0 5px 20px rgba(0,0,0,0.1);
+            --shadow-lg: 0 20px 60px rgba(0,0,0,0.3);
+            --radius-md: 15px;
+            --radius-lg: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .version-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 0.7em;
+            margin-left: 10px;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .status-item {
+            padding: 5px 15px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .api-status-bar {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .status-indicator {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .status-indicator.online {
+            background: rgba(46,213,115,0.3);
+            border: 1px solid #2ed573;
+        }
+
+        .status-indicator.offline {
+            background: rgba(255,71,87,0.3);
+            border: 1px solid #ff4757;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .config-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .config-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .api-keys-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .api-key-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .api-logo {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .api-key-card input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .api-key-card input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .api-limits, .api-usage {
+            font-size: 0.8em;
+            color: #999;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .pairs-section {
+            margin-bottom: 30px;
+        }
+
+        .pairs-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .pairs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .pair-btn {
+            padding: 15px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .pair-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .pair-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+
+        .card.buy {
+            border-left-color: #2ed573;
+            background: linear-gradient(135deg, #f0fff4 0%, #ffffff 100%);
+        }
+
+        .card.sell {
+            border-left-color: #ff4757;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
+        }
+
+        .card.neutral {
+            border-left-color: #ffa502;
+            background: linear-gradient(135deg, #fffbf0 0%, #ffffff 100%);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .signal-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+            color: white;
+        }
+
+        .signal-badge.compra {
+            background: #2ed573;
+        }
+
+        .signal-badge.venda {
+            background: #ff4757;
+        }
+
+        .signal-badge.neutro {
+            background: #ffa502;
+        }
+
+        .indicator {
+            margin-bottom: 12px;
+        }
+
+        .indicator-label {
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .indicator-value {
+            font-size: 1.1em;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s;
+            border-radius: 5px;
+        }
+
+        .strength-meter {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .strength-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ddd;
+        }
+
+        .strength-dot.active {
+            background: #2ed573;
+        }
+
+        .strength-dot.medium {
+            background: #ffa502;
+        }
+
+        .strength-dot.weak {
+            background: #ff4757;
+        }
+
+        .signals-section {
+            background: #f9f9f9;
+            border-radius: 15px;
+            padding: 25px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        /* Lista de Sinais */
+        .signal-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            border-left: 4px solid #ffa502;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .signal-item.buy-signal {
+            border-left-color: #2ed573;
+        }
+
+        .signal-item.sell-signal {
+            border-left-color: #ff4757;
+        }
+
+        .signal-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .signal-item::after {
+            content: '👆 Clique para detalhes';
+            position: absolute;
+            right: 10px;
+            top: -10px;
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 0.7em;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .signal-item:hover::after {
+            opacity: 1;
+        }
+
+        .signal-info {
+            flex: 1;
+        }
+
+        .signal-pair {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        .signal-details {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .signal-action {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            color: white;
+            margin-left: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .actions-bar {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .loading-state i {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .message-area {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message-area.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .message-area.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .message-area.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+
+        /* MODAL FLUTUANTE */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 9998;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            animation: slideUp 0.4s;
+            position: relative;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .modal-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .modal-close {
+            background: #f0f0f0;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: #ff4757;
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        /* Grid de Preços no Modal */
+        .price-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .price-box {
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+            transition: transform 0.3s;
+        }
+
+        .price-box:hover {
+            transform: scale(1.05);
+        }
+
+        .price-box.entry {
+            background: linear-gradient(135deg, #667eea15, #764ba215);
+            border-color: #667eea;
+        }
+
+        .price-box.tp {
+            background: linear-gradient(135deg, #2ed57315, #2ed57315);
+            border-color: #2ed573;
+        }
+
+        .price-box.sl {
+            background: linear-gradient(135deg, #ff475715, #ff475715);
+            border-color: #ff4757;
+        }
+
+        .price-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .price-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .price-pips {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .price-risk {
+            font-size: 0.85em;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        /* Barra de Progresso do Trade */
+        .trade-progress {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .trade-progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .trade-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4757, #ffa502, #2ed573);
+            border-radius: 15px;
+            position: relative;
+            transition: width 0.5s;
+        }
+
+        .current-price-marker {
+            position: absolute;
+            top: -5px;
+            width: 2px;
+            height: 40px;
+            background: #333;
+            transform: translateX(-50%);
+        }
+
+        .current-price-label {
+            position: absolute;
+            top: -25px;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 0.75em;
+            white-space: nowrap;
+        }
+
+        /* Informações do Trade */
+        .trade-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .trade-info-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .trade-info-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .trade-info-label {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .trade-info-value.positive {
+            color: #2ed573;
+        }
+
+        .trade-info-value.negative {
+            color: #ff4757;
+        }
+
+        /* Botão de Copiar */
+        .copy-btn {
+            background: #f0f0f0;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .copy-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Indicadores no Modal */
+        .modal-indicators {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .modal-indicator {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .modal-indicator-value {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        .modal-indicator-label {
+            font-size: 0.75em;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        /* Confiança */
+        .confidence-meter {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .confidence-value {
+            font-size: 3em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .confidence-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-buy {
+            background: #2ed573;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-sell {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-buy:hover, .btn-sell:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .api-keys-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions-bar {
+                flex-direction: column;
+            }
+            
+            .signal-item {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .signal-action {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+
+            .price-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 20px;
+                width: 98%;
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <i class="fas fa-chart-line"></i>
+                Sinais Forex Pro
+                <span class="version-badge">v3.0</span>
+            </h1>
+            <p>Análise técnica avançada com pontos de entrada e take profit</p>
+            
+            <div class="status-bar">
+                <div class="status-item">
+                    <i class="fas fa-circle" id="marketCircle" style="color: #2ed573;"></i>
+                    <span id="marketStatus">Carregando...</span>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-microchip"></i>
+                    <span id="processingStatus">Pronto</span>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-database"></i>
+                    <span id="cacheStatus">Cache: 0 MB</span>
+                </div>
+            </div>
+            
+            <div class="api-status-bar">
+                <div class="status-indicator offline" id="oandaStatus">
+                    <i class="fas fa-circle"></i> OANDA: Offline
+                </div>
+                <div class="status-indicator offline" id="alphaVantageStatus">
+                    <i class="fas fa-circle"></i> Alpha Vantage: Offline
+                </div>
+                <div class="status-indicator offline" id="twelveDataStatus">
+                    <i class="fas fa-circle"></i> Twelve Data: Offline
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Config Section -->
+            <div class="config-section">
+                <h3><i class="fas fa-key"></i> Configuração das APIs</h3>
+                <div class="api-keys-grid">
+                    <div class="api-key-card">
+                        <div class="api-logo">🔑 OANDA</div>
+                        <input type="password" id="oandaKey" placeholder="Sua chave OANDA">
+                        <div class="api-limits">Limite: 10 req/s</div>
+                        <div class="api-usage" id="oandaUsage">Uso: 0%</div>
+                    </div>
+                    <div class="api-key-card">
+                        <div class="api-logo">🔑 Alpha Vantage</div>
+                        <input type="password" id="alphaVantageKey" placeholder="Sua chave Alpha Vantage">
+                        <div class="api-limits">Limite: 5 req/min</div>
+                        <div class="api-usage" id="alphaVantageUsage">Uso: 0%</div>
+                    </div>
+                    <div class="api-key-card">
+                        <div class="api-logo">🔑 Twelve Data</div>
+                        <input type="password" id="twelveDataKey" placeholder="Sua chave Twelve Data">
+                        <div class="api-limits">Limite: 8 req/min</div>
+                        <div class="api-usage" id="twelveDataUsage">Uso: 0%</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="saveApiKeys()">
+                    <i class="fas fa-save"></i> Salvar Configurações
+                </button>
+            </div>
+
+            <!-- Pair Selector -->
+            <div class="pairs-section">
+                <h3><i class="fas fa-exchange-alt"></i> Pares de Moedas</h3>
+                <div class="pairs-grid" id="pairSelector">
+                    <button class="pair-btn active" data-pair="EUR_USD">EUR/USD</button>
+                    <button class="pair-btn" data-pair="GBP_USD">GBP/USD</button>
+                    <button class="pair-btn" data-pair="USD_JPY">USD/JPY</button>
+                    <button class="pair-btn" data-pair="AUD_USD">AUD/USD</button>
+                    <button class="pair-btn" data-pair="USD_CAD">USD/CAD</button>
+                    <button class="pair-btn" data-pair="EUR_GBP">EUR/GBP</button>
+                </div>
+            </div>
+
+            <!-- Message Area -->
+            <div class="message-area" id="messageArea"></div>
+
+            <!-- Dashboard -->
+            <div class="dashboard-grid" id="dashboard">
+                <div class="loading-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Carregando dados do mercado...</p>
+                </div>
+            </div>
+
+            <!-- Signals -->
+            <div class="signals-section">
+                <div class="section-header">
+                    <h3><i class="fas fa-signal"></i> Sinais de Entrada Detectados</h3>
+                    <span id="signalsCount" style="background: #667eea; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.9em;">0 sinais</span>
+                </div>
+                <div id="signalsList">
+                    <div class="loading-state">
+                        <i class="fas fa-search"></i>
+                        <p>Aguardando análise...</p>
+                    </div>
+                </div>
+                <div class="actions-bar">
+                    <button class="btn btn-primary" onclick="fetchRealTimeData()">
+                        <i class="fas fa-satellite"></i> Buscar Dados Reais
+                    </button>
+                    <button class="btn btn-primary" onclick="useSimulatedData()" style="background: #2ed573;">
+                        <i class="fas fa-random"></i> Usar Dados Simulados
+                    </button>
+                    <button class="btn btn-primary" onclick="refreshData()" style="background: #ffa502;">
+                        <i class="fas fa-sync"></i> Atualizar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL FLUTUANTE -->
+    <div class="modal-overlay" id="tradeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">
+                    <i class="fas fa-chart-bar"></i>
+                    Detalhes do Sinal
+                </div>
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div id="modalBody">
+                <!-- Conteúdo dinâmico -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // APLICATIVO PRINCIPAL
+        // ============================================
+
+        const APP_STATE = {
+            currentPair: 'EUR_USD',
+            usingRealData: false,
+            apiKeys: {},
+            currentSignals: []
+        };
+
+        const PRICE_CONFIG = {
+            'EUR_USD': { base: 1.0850, spread: 0.0100, pipValue: 10, pipSize: 0.0001 },
+            'GBP_USD': { base: 1.2650, spread: 0.0150, pipValue: 10, pipSize: 0.0001 },
+            'USD_JPY': { base: 148.50, spread: 2.00, pipValue: 6.73, pipSize: 0.01 },
+            'AUD_USD': { base: 0.6550, spread: 0.0080, pipValue: 10, pipSize: 0.0001 },
+            'USD_CAD': { base: 1.3550, spread: 0.0100, pipValue: 7.38, pipSize: 0.0001 },
+            'EUR_GBP': { base: 0.8570, spread: 0.0080, pipValue: 12.66, pipSize: 0.0001 }
+        };
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('✅ Aplicativo iniciado!');
+            loadSavedKeys();
+            updateMarketStatus();
+            useSimulatedData();
+            setupEventListeners();
+            
+            // Fechar modal ao clicar fora
+            document.getElementById('tradeModal').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) {
+                    closeModal();
+                }
+            });
+            
+            // Fechar modal com ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
+            });
+        });
+
+        function loadSavedKeys() {
+            try {
+                const saved = localStorage.getItem('forex_api_keys');
+                if (saved) {
+                    const keys = JSON.parse(saved);
+                    document.getElementById('oandaKey').value = keys.oanda || '';
+                    document.getElementById('alphaVantageKey').value = keys.alphaVantage || '';
+                    document.getElementById('twelveDataKey').value = keys.twelveData || '';
+                    APP_STATE.apiKeys = keys;
+                    updateApiStatus();
+                }
+            } catch (error) {
+                console.error('Erro ao carregar chaves:', error);
+            }
+        }
+
+        function saveApiKeys() {
+            const keys = {
+                oanda: document.getElementById('oandaKey').value.trim(),
+                alphaVantage: document.getElementById('alphaVantageKey').value.trim(),
+                twelveData: document.getElementById('twelveDataKey').value.trim()
+            };
+            
+            localStorage.setItem('forex_api_keys', JSON.stringify(keys));
+            APP_STATE.apiKeys = keys;
+            showMessage('✅ Configurações salvas com sucesso!', 'success');
+            updateApiStatus();
+        }
+
+        function updateApiStatus() {
+            updateApiIndicator('oandaStatus', !!APP_STATE.apiKeys.oanda);
+            updateApiIndicator('alphaVantageStatus', !!APP_STATE.apiKeys.alphaVantage);
+            updateApiIndicator('twelveDataStatus', !!APP_STATE.apiKeys.twelveData);
+        }
+
+        function updateApiIndicator(elementId, isOnline) {
+            const element = document.getElementById(elementId);
+            const name = element.textContent.split(':')[0];
+            if (isOnline) {
+                element.className = 'status-indicator online';
+                element.innerHTML = `<i class="fas fa-circle"></i> ${name}: Online`;
+            } else {
+                element.className = 'status-indicator offline';
+                element.innerHTML = `<i class="fas fa-circle"></i> ${name}: Offline`;
+            }
+        }
+
+        function updateMarketStatus() {
+            const now = new Date();
+            const day = now.getDay();
+            const hour = now.getUTCHours();
+            const isWeekend = day === 0 || (day === 6 && hour >= 22) || (day === 5 && hour >= 22);
+            
+            const marketStatus = document.getElementById('marketStatus');
+            const marketCircle = document.getElementById('marketCircle');
+            
+            if (isWeekend) {
+                marketStatus.textContent = 'Mercado Fechado';
+                marketCircle.style.color = '#ff4757';
+            } else {
+                if (hour >= 7 && hour < 15) marketStatus.textContent = 'Sessão Europeia';
+                else if (hour >= 12 && hour < 20) marketStatus.textContent = 'Sessão Americana';
+                else if (hour >= 0 && hour < 8) marketStatus.textContent = 'Sessão Asiática';
+                else marketStatus.textContent = 'Mercado Aberto';
+                marketCircle.style.color = '#2ed573';
+            }
+        }
+
+        function setupEventListeners() {
+            document.getElementById('pairSelector').addEventListener('click', (e) => {
+                const btn = e.target.closest('.pair-btn');
+                if (!btn) return;
+                
+                document.querySelectorAll('.pair-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                APP_STATE.currentPair = btn.dataset.pair;
+                refreshData();
+            });
+        }
+
+        // Gerar indicadores simulados
+        function generateIndicators(pair) {
+            const config = PRICE_CONFIG[pair] || { base: 1.0000, spread: 0.0100, pipSize: 0.0001 };
+            const currentPrice = config.base + (Math.random() - 0.5) * config.spread;
+            const rsi = 30 + Math.random() * 40;
+            
+            return {
+                pair: pair.replace('_', '/'),
+                currentPrice,
+                bid: currentPrice - config.spread * 0.1,
+                ask: currentPrice + config.spread * 0.1,
+                rsi,
+                macdHistogram: (Math.random() - 0.5) * 0.002,
+                sma20: currentPrice * (1 + (Math.random() - 0.5) * 0.003),
+                sma50: currentPrice * (1 + (Math.random() - 0.5) * 0.005),
+                bbUpper: currentPrice * 1.005,
+                bbLower: currentPrice * 0.995,
+                bbMiddle: currentPrice,
+                bbPosition: 30 + Math.random() * 40,
+                stochastic: 20 + Math.random() * 60,
+                atr: currentPrice * 0.001,
+                sources: ['Simulação'],
+                pipSize: config.pipSize,
+                pipValue: config.pipValue
+            };
+        }
+
+        // Analisar sinais
+        function analyzeSignals(indicators) {
+            let buySignals = 0;
+            let sellSignals = 0;
+            const details = [];
+            
+            if (indicators.rsi < 30) {
+                buySignals++;
+                details.push({ indicator: 'RSI', signal: 'Compra', reason: 'Sobrevendido' });
+            } else if (indicators.rsi > 70) {
+                sellSignals++;
+                details.push({ indicator: 'RSI', signal: 'Venda', reason: 'Sobrecomprado' });
+            } else {
+                details.push({ indicator: 'RSI', signal: 'Neutro', reason: 'Zona neutra' });
+            }
+            
+            if (indicators.macdHistogram > 0.0005) {
+                buySignals++;
+                details.push({ indicator: 'MACD', signal: 'Compra', reason: 'Momentum positivo' });
+            } else if (indicators.macdHistogram < -0.0005) {
+                sellSignals++;
+                details.push({ indicator: 'MACD', signal: 'Venda', reason: 'Momentum negativo' });
+            }
+            
+            if (indicators.sma20 > indicators.sma50) {
+                buySignals++;
+                details.push({ indicator: 'MA', signal: 'Compra', reason: 'Tendência de alta' });
+            } else {
+                sellSignals++;
+                details.push({ indicator: 'MA', signal: 'Venda', reason: 'Tendência de baixa' });
+            }
+            
+            if (indicators.bbPosition < 20) {
+                buySignals++;
+                details.push({ indicator: 'Bollinger', signal: 'Compra', reason: 'Banda inferior' });
+            } else if (indicators.bbPosition > 80) {
+                sellSignals++;
+                details.push({ indicator: 'Bollinger', signal: 'Venda', reason: 'Banda superior' });
+            }
+            
+            const totalSignals = buySignals + sellSignals;
+            let finalSignal, strength;
+            
+            if (buySignals >= 3) {
+                finalSignal = 'COMPRA';
+                strength = Math.min(100, (buySignals / totalSignals) * 100 + 20);
+            } else if (sellSignals >= 3) {
+                finalSignal = 'VENDA';
+                strength = Math.min(100, (sellSignals / totalSignals) * 100 + 20);
+            } else if (buySignals > sellSignals) {
+                finalSignal = 'COMPRA';
+                strength = (buySignals / totalSignals) * 100;
+            } else if (sellSignals > buySignals) {
+                finalSignal = 'VENDA';
+                strength = (sellSignals / totalSignals) * 100;
+            } else {
+                finalSignal = 'NEUTRO';
+                strength = 30;
+            }
+            
+            // Calcular níveis de entrada, TP e SL
+            const entryLevels = calculateEntryLevels(indicators, finalSignal, strength);
+            
+            return { 
+                finalSignal, 
+                strength: Math.round(strength), 
+                details, 
+                buySignals, 
+                sellSignals, 
+                indicators,
+                entryLevels
+            };
+        }
+
+        // Calcular níveis de entrada, TP e SL
+        function calculateEntryLevels(indicators, signal, strength) {
+            const currentPrice = indicators.currentPrice;
+            const pipSize = indicators.pipSize || 0.0001;
+            const atr = indicators.atr || currentPrice * 0.001;
+            
+            // Ajustar risco baseado na força do sinal
+            const riskMultiplier = strength > 70 ? 1.2 : strength > 50 ? 1.0 : 0.8;
+            
+            if (signal === 'COMPRA') {
+                // Para compra: entrada no pullback, TP nas resistências
+                const entryZone = {
+                    ideal: currentPrice - atr * 0.5,
+                    agressivo: currentPrice,
+                    conservador: currentPrice - atr * 1.0
+                };
+                
+                const stopLoss = currentPrice - atr * 1.5 * riskMultiplier;
+                const takeProfit1 = currentPrice + atr * 2.0 * riskMultiplier;
+                const takeProfit2 = currentPrice + atr * 3.5 * riskMultiplier;
+                
+                const riskPips = Math.round((currentPrice - stopLoss) / pipSize);
+                const rewardPips1 = Math.round((takeProfit1 - currentPrice) / pipSize);
+                const rewardPips2 = Math.round((takeProfit2 - currentPrice) / pipSize);
+                
+                return {
+                    direction: 'COMPRA',
+                    currentPrice,
+                    entryZone,
+                    stopLoss,
+                    takeProfit1,
+                    takeProfit2,
+                    riskPips,
+                    rewardPips1,
+                    rewardPips2,
+                    riskReward1: (rewardPips1 / riskPips).toFixed(2),
+                    riskReward2: (rewardPips2 / riskPips).toFixed(2),
+                    atr,
+                    pipSize
+                };
+            } else if (signal === 'VENDA') {
+                // Para venda: entrada no rally, TP nos suportes
+                const entryZone = {
+                    ideal: currentPrice + atr * 0.5,
+                    agressivo: currentPrice,
+                    conservador: currentPrice + atr * 1.0
+                };
+                
+                const stopLoss = currentPrice + atr * 1.5 * riskMultiplier;
+                const takeProfit1 = currentPrice - atr * 2.0 * riskMultiplier;
+                const takeProfit2 = currentPrice - atr * 3.5 * riskMultiplier;
+                
+                const riskPips = Math.round((stopLoss - currentPrice) / pipSize);
+                const rewardPips1 = Math.round((currentPrice - takeProfit1) / pipSize);
+                const rewardPips2 = Math.round((currentPrice - takeProfit2) / pipSize);
+                
+                return {
+                    direction: 'VENDA',
+                    currentPrice,
+                    entryZone,
+                    stopLoss,
+                    takeProfit1,
+                    takeProfit2,
+                    riskPips,
+                    rewardPips1,
+                    rewardPips2,
+                    riskReward1: (rewardPips1 / riskPips).toFixed(2),
+                    riskReward2: (rewardPips2 / riskPips).toFixed(2),
+                    atr,
+                    pipSize
+                };
+            }
+            
+            return null;
+        }
+
+        // Renderizar dashboard
+        function renderDashboard(analysis) {
+            const dashboard = document.getElementById('dashboard');
+            const ind = analysis.indicators;
+            
+            let signalClass = 'neutral';
+            let signalBadge = 'NEUTRO';
+            
+            if (analysis.finalSignal === 'COMPRA') {
+                signalClass = 'buy';
+                signalBadge = 'COMPRA';
+            } else if (analysis.finalSignal === 'VENDA') {
+                signalClass = 'sell';
+                signalBadge = 'VENDA';
+            }
+            
+            const strengthStars = Math.ceil(analysis.strength / 20);
+            
+            let entryHTML = '';
+            if (analysis.entryLevels) {
+                const el = analysis.entryLevels;
+                const entryPrice = el.entryZone.ideal;
+                entryHTML = `
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+                        <div class="indicator-label">🎯 Níveis de Entrada</div>
+                        <div class="indicator-value" style="font-size: 0.95em;">
+                            Entrada: <strong>${entryPrice.toFixed(5)}</strong><br>
+                            Stop Loss: <strong style="color: #ff4757;">${el.stopLoss.toFixed(5)}</strong> (${el.riskPips} pips)<br>
+                            Take Profit 1: <strong style="color: #2ed573;">${el.takeProfit1.toFixed(5)}</strong> (${el.rewardPips1} pips)<br>
+                            Take Profit 2: <strong style="color: #2ed573;">${el.takeProfit2.toFixed(5)}</strong> (${el.rewardPips2} pips)<br>
+                            <small style="color: #999;">R/R ratio: ${el.riskReward1} / ${el.riskReward2}</small>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            dashboard.innerHTML = `
+                <div class="card ${signalClass}">
+                    <div class="card-header">
+                        <div class="card-title">${ind.pair}</div>
+                        <span class="signal-badge ${signalBadge.toLowerCase()}">${signalBadge}</span>
+                    </div>
+                    <div class="indicator">
+                        <div class="indicator-label">Preço Atual</div>
+                        <div class="indicator-value">${ind.currentPrice.toFixed(5)}</div>
+                    </div>
+                    <div class="indicator">
+                        <div class="indicator-label">Força do Sinal: ${analysis.strength}%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${analysis.strength}%; background: ${analysis.finalSignal === 'COMPRA' ? '#2ed573' : analysis.finalSignal === 'VENDA' ? '#ff4757' : '#ffa502'};"></div>
+                        </div>
+                    </div>
+                    <div class="strength-meter">
+                        ${Array(5).fill(0).map((_, i) => `
+                            <div class="strength-dot ${i < strengthStars ? (analysis.strength > 60 ? 'active' : 'medium') : ''}"></div>
+                        `).join('')}
+                    </div>
+                    ${entryHTML}
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">📊 Indicadores Técnicos</div>
+                    </div>
+                    <div class="indicator">
+                        <div class="indicator-label">RSI (14)</div>
+                        <div class="indicator-value">${ind.rsi.toFixed(2)}</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${ind.rsi}%; background: ${ind.rsi > 70 ? '#ff4757' : ind.rsi < 30 ? '#2ed573' : '#667eea'};"></div>
+                        </div>
+                        <small style="color: #999;">${ind.rsi < 30 ? 'Sobrevendido' : ind.rsi > 70 ? 'Sobrecomprado' : 'Neutro'}</small>
+                    </div>
+                    <div class="indicator">
+                        <div class="indicator-label">MACD Histograma</div>
+                        <div class="indicator-value">${ind.macdHistogram > 0 ? '+' : ''}${ind.macdHistogram.toFixed(5)}</div>
+                    </div>
+                    <div class="indicator">
+                        <div class="indicator-label">Estocástico</div>
+                        <div class="indicator-value">${ind.stochastic.toFixed(2)}</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">📈 Médias Móveis</div>
+                    </div>
+                    <div class="indicator">
+                        <div class="indicator-label">SMA 20</div>
+                        <div class="indicator-value">${ind.sma20.toFixed(5)}</div>
+                    </div>
+                    <div class="indicator">
+                        <div class="indicator-label">SMA 50</div>
+                        <div class="indicator-value">${ind.sma50.toFixed(5)}</div>
+                    </div>
+                    <div class="indicator">
+                        <div class="indicator-label">Bandas de Bollinger</div>
+                        <div class="indicator-value">
+                            Sup: ${ind.bbUpper.toFixed(5)} | Inf: ${ind.bbLower.toFixed(5)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Renderizar sinais com clique para modal
+        function renderSignals(signals) {
+            APP_STATE.currentSignals = signals;
+            const signalsList = document.getElementById('signalsList');
+            const signalsCount = document.getElementById('signalsCount');
+            
+            signalsCount.textContent = `${signals.length} sinais`;
+            
+            const strongSignals = signals.filter(s => s.strength > 50);
+            
+            if (strongSignals.length === 0) {
+                signalsList.innerHTML = `
+                    <div class="loading-state">
+                        <i class="fas fa-search"></i>
+                        <p>Nenhum sinal forte detectado</p>
+                        <small style="color: #999;">Tente atualizar os dados</small>
+                    </div>
+                `;
+                return;
+            }
+            
+            signalsList.innerHTML = strongSignals.map((signal, index) => {
+                const ind = signal.indicators;
+                const isBuy = signal.finalSignal === 'COMPRA';
+                const color = isBuy ? '#2ed573' : '#ff4757';
+                const signalClass = isBuy ? 'buy-signal' : 'sell-signal';
+                
+                return `
+                    <div class="signal-item ${signalClass}" onclick="openTradeModal(${index})" title="Clique para ver pontos de entrada e TP">
+                        <div class="signal-info">
+                            <div class="signal-pair">
+                                ${ind.pair} - ${ind.currentPrice.toFixed(5)}
+                                <span style="font-size: 0.7em; color: #999;">👆 Clique para detalhes</span>
+                            </div>
+                            <div class="signal-details">
+                                RSI: ${ind.rsi.toFixed(1)} | Força: ${signal.strength}% | 
+                                ${signal.entryLevels ? `R/R: ${signal.entryLevels.riskReward1}` : ''}
+                            </div>
+                        </div>
+                        <div class="signal-action" style="background: ${color};">
+                            ${signal.finalSignal}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ABRIR MODAL COM DETALHES DO TRADE
+        function openTradeModal(signalIndex) {
+            const signal = APP_STATE.currentSignals[signalIndex];
+            if (!signal || !signal.entryLevels) return;
+            
+            const el = signal.entryLevels;
+            const ind = signal.indicators;
+            const isBuy = el.direction === 'COMPRA';
+            
+            // Atualizar título do modal
+            document.getElementById('modalTitle').innerHTML = `
+                <span style="color: ${isBuy ? '#2ed573' : '#ff4757'};">
+                    ${isBuy ? '🟢' : '🔴'}
+                </span>
+                ${ind.pair} - Sinal de ${el.direction}
+            `;
+            
+            // Calcular percentual de progresso entre SL e TP
+            const totalRange = el.direction === 'COMPRA' 
+                ? el.takeProfit2 - el.stopLoss 
+                : el.stopLoss - el.takeProfit2;
+            const currentPosition = el.direction === 'COMPRA'
+                ? el.currentPrice - el.stopLoss
+                : el.stopLoss - el.currentPrice;
+            const progressPercent = Math.max(0, Math.min(100, (currentPosition / totalRange) * 100));
+            
+            // Construir conteúdo do modal
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = `
+                <!-- Preços Principais -->
+                <div class="price-grid">
+                    <div class="price-box entry">
+                        <div class="price-label">🎯 Entrada Ideal</div>
+                        <div class="price-value">${el.entryZone.ideal.toFixed(5)}</div>
+                        <div class="price-pips">Spread: ${Math.abs(ind.ask - ind.bid).toFixed(5)}</div>
+                        <button class="copy-btn" onclick="copyToClipboard('${el.entryZone.ideal.toFixed(5)}')">
+                            <i class="fas fa-copy"></i> Copiar Preço
+                        </button>
+                    </div>
+                    
+                    <div class="price-box" style="border-color: #ffa502;">
+                        <div class="price-label">💵 Preço Atual</div>
+                        <div class="price-value" style="font-size: 2.2em;">${el.currentPrice.toFixed(5)}</div>
+                        <div class="price-pips">
+                            ${isBuy ? 
+                                `Distância entrada: ${((el.entryZone.ideal - el.currentPrice) / el.pipSize).toFixed(0)} pips` :
+                                `Distância entrada: ${((el.currentPrice - el.entryZone.ideal) / el.pipSize).toFixed(0)} pips`
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="price-box sl">
+                        <div class="price-label">🛑 Stop Loss</div>
+                        <div class="price-value">${el.stopLoss.toFixed(5)}</div>
+                        <div class="price-pips">Risco: ${el.riskPips} pips</div>
+                        <div class="price-risk">
+                            Perda máxima: $${((el.riskPips * el.pipSize * 1000) / el.currentPrice).toFixed(2)}
+                        </div>
+                        <button class="copy-btn" onclick="copyToClipboard('${el.stopLoss.toFixed(5)}')">
+                            <i class="fas fa-copy"></i> Copiar SL
+                        </button>
+                    </div>
+                    
+                    <div class="price-box tp">
+                        <div class="price-label">✅ Take Profit 1</div>
+                        <div class="price-value">${el.takeProfit1.toFixed(5)}</div>
+                        <div class="price-pips">Alvo: ${el.rewardPips1} pips</div>
+                        <div class="price-risk">R/R: ${el.riskReward1}</div>
+                        <button class="copy-btn" onclick="copyToClipboard('${el.takeProfit1.toFixed(5)}')">
+                            <i class="fas fa-copy"></i> Copiar TP1
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Segundo Take Profit -->
+                <div class="price-box tp" style="margin-bottom: 25px; text-align: center;">
+                    <div class="price-label">✅✅ Take Profit 2 (Estendido)</div>
+                    <div class="price-value" style="font-size: 1.5em;">${el.takeProfit2.toFixed(5)}</div>
+                    <div class="price-pips">Alvo: ${el.rewardPips2} pips | R/R: ${el.riskReward2}</div>
+                    <button class="copy-btn" onclick="copyToClipboard('${el.takeProfit2.toFixed(5)}')">
+                        <i class="fas fa-copy"></i> Copiar TP2
+                    </button>
+                </div>
+                
+                <!-- Barra de Progresso do Trade -->
+                <div class="trade-progress">
+                    <div class="progress-labels">
+                        <span style="color: #ff4757;">SL: ${el.stopLoss.toFixed(5)}</span>
+                        <span>Preço Atual</span>
+                        <span style="color: #2ed573;">TP2: ${el.takeProfit2.toFixed(5)}</span>
+                    </div>
+                    <div class="trade-progress-bar">
+                        <div class="trade-progress-fill" style="width: ${progressPercent}%;"></div>
+                    </div>
+                    <div style="text-align: center; margin-top: 10px; font-size: 0.85em; color: #666;">
+                        ${el.direction === 'COMPRA' ? 
+                            `Distância até TP1: ${((el.takeProfit1 - el.currentPrice) / el.pipSize).toFixed(0)} pips` :
+                            `Distância até TP1: ${((el.currentPrice - el.takeProfit1) / el.pipSize).toFixed(0)} pips`
+                        }
+                    </div>
+                </div>
+                
+                <!-- Informações do Trade -->
+                <div class="trade-info-grid">
+                    <div class="trade-info-item">
+                        <div class="trade-info-value">${el.riskPips}</div>
+                        <div class="trade-info-label">Risco (pips)</div>
+                    </div>
+                    <div class="trade-info-item">
+                        <div class="trade-info-value">${el.rewardPips1}</div>
+                        <div class="trade-info-label">Alvo 1 (pips)</div>
+                    </div>
+                    <div class="trade-info-item">
+                        <div class="trade-info-value">${el.riskReward1}</div>
+                        <div class="trade-info-label">R/R Ratio</div>
+                    </div>
+                    <div class="trade-info-item">
+                        <div class="trade-info-value ${signal.strength > 60 ? 'positive' : 'negative'}">${signal.strength}%</div>
+                        <div class="trade-info-label">Força do Sinal</div>
+                    </div>
+                </div>
+                
+                <!-- Indicadores no Modal -->
+                <div class="modal-indicators">
+                    <div class="modal-indicator">
+                        <div class="modal-indicator-value" style="color: ${ind.rsi < 30 ? '#2ed573' : ind.rsi > 70 ? '#ff4757' : '#333'};">${ind.rsi.toFixed(0)}</div>
+                        <div class="modal-indicator-label">RSI</div>
+                    </div>
+                    <div class="modal-indicator">
+                        <div class="modal-indicator-value">${ind.stochastic.toFixed(0)}</div>
+                        <div class="modal-indicator-label">Estocástico</div>
+                    </div>
+                    <div class="modal-indicator">
+                        <div class="modal-indicator-value">${ind.bbPosition.toFixed(0)}%</div>
+                        <div class="modal-indicator-label">Bollinger %B</div>
+                    </div>
+                    <div class="modal-indicator">
+                        <div class="modal-indicator-value">${el.atr.toFixed(5)}</div>
+                        <div class="modal-indicator-label">ATR</div>
+                    </div>
+                </div>
+                
+                <!-- Confiança -->
+                <div class="confidence-meter">
+                    <div class="confidence-value">${signal.strength}%</div>
+                    <div class="confidence-label">Nível de Confiança do Sinal</div>
+                </div>
+                
+                <!-- Botões de Ação -->
+                <div class="action-buttons">
+                    <button class="btn-buy" onclick="copyTradePlan('${el.direction}')">
+                        <i class="fas fa-copy"></i> Copiar Plano de Trade
+                    </button>
+                    <button class="btn-sell" onclick="closeModal()">
+                        <i class="fas fa-times"></i> Fechar
+                    </button>
+                </div>
+                
+                <div style="text-align: center; margin-top: 15px; font-size: 0.8em; color: #999;">
+                    ⚠️ Gerado em: ${new Date().toLocaleString('pt-BR')} | Fonte: ${ind.sources.join(', ')}
+                </div>
+            `;
+            
+            // Mostrar modal
+            document.getElementById('tradeModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Fechar modal
+        function closeModal() {
+            document.getElementById('tradeModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Copiar para clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showMessage('✅ Preço copiado: ' + text, 'success');
+            }).catch(() => {
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showMessage('✅ Preço copiado!', 'success');
+            });
+        }
+
+        // Copiar plano de trade completo
+        function copyTradePlan(direction) {
+            const signal = APP_STATE.currentSignals.find(s => s.entryLevels?.direction === direction);
+            if (!signal) return;
+            
+            const el = signal.entryLevels;
+            const ind = signal.indicators;
+            
+            const plan = `
+        📊 PLANO DE TRADE - ${ind.pair}
+        Direção: ${el.direction}
+        
+        🎯 Entrada: ${el.entryZone.ideal.toFixed(5)}
+        🛑 Stop Loss: ${el.stopLoss.toFixed(5)} (${el.riskPips} pips)
+        ✅ Take Profit 1: ${el.takeProfit1.toFixed(5)} (${el.rewardPips1} pips)
+        ✅ Take Profit 2: ${el.takeProfit2.toFixed(5)} (${el.rewardPips2} pips)
+        
+        📈 R/R Ratio: ${el.riskReward1} / ${el.riskReward2}
+        💪 Força do Sinal: ${signal.strength}%
+        📊 RSI: ${ind.rsi.toFixed(0)}
+        
+        ⚠️ Gerado por Sinais Forex Pro
+        ${new Date().toLocaleString('pt-BR')}
+            `.trim();
+            
+            copyToClipboard(plan);
+            showMessage('📋 Plano de trade copiado!', 'success');
+        }
+
+        // Buscar dados reais
+        async function fetchRealTimeData() {
+            APP_STATE.usingRealData = true;
+            showMessage('🔄 Buscando dados das APIs...', 'info');
+            
+            document.getElementById('dashboard').innerHTML = `
+                <div class="loading-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Conectando às APIs...</p>
+                </div>
+            `;
+            
+            try {
+                const price = await fetchRealPrice(APP_STATE.currentPair);
+                
+                if (price) {
+                    const indicators = {
+                        ...generateIndicators(APP_STATE.currentPair),
+                        currentPrice: price.price,
+                        bid: price.bid,
+                        ask: price.ask,
+                        sources: ['API Real']
+                    };
+                    
+                    const analysis = analyzeSignals(indicators);
+                    renderDashboard(analysis);
+                    
+                    const allPairs = ['EUR_USD', 'GBP_USD', 'USD_JPY', 'AUD_USD', 'USD_CAD', 'EUR_GBP'];
+                    const signals = [];
+                    
+                    for (const pair of allPairs) {
+                        const ind = generateIndicators(pair);
+                        signals.push(analyzeSignals(ind));
+                    }
+                    
+                    signals.sort((a, b) => b.strength - a.strength);
+                    renderSignals(signals);
+                    
+                    showMessage('✅ Dados atualizados com sucesso!', 'success');
+                } else {
+                    throw new Error('Nenhuma API disponível');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                showMessage('❌ Erro ao conectar. Usando dados simulados.', 'error');
+                useSimulatedData();
+            }
+        }
+
+        async function fetchRealPrice(pair) {
+            if (APP_STATE.apiKeys.oanda) {
+                try {
+                    const response = await fetch(
+                        `https://api-fxpractice.oanda.com/v3/accounts/primary/pricing?instruments=${pair}`,
+                        {
+                            headers: {
+                                'Authorization': `Bearer ${APP_STATE.apiKeys.oanda}`,
+                                'Content-Type': 'application/json'
+                            }
+                        }
+                    );
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        const price = data.prices[0];
+                        return {
+                            price: parseFloat(price.bids[0].price),
+                            bid: parseFloat(price.bids[0].price),
+                            ask: parseFloat(price.asks[0].price)
+                        };
+                    }
+                } catch (error) {
+                    console.warn('OANDA indisponível:', error);
+                }
+            }
+            
+            if (APP_STATE.apiKeys.twelveData) {
+                try {
+                    const formattedPair = pair.replace('_', '/');
+                    const response = await fetch(
+                        `https://api.twelvedata.com/price?symbol=${formattedPair}&apikey=${APP_STATE.apiKeys.twelveData}`
+                    );
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        const price = parseFloat(data.price);
+                        return { price, bid: price, ask: price * 1.0001 };
+                    }
+                } catch (error) {
+                    console.warn('Twelve Data indisponível:', error);
+                }
+            }
+            
+            return null;
+        }
+
+        function useSimulatedData() {
+            APP_STATE.usingRealData = false;
+            
+            const indicators = generateIndicators(APP_STATE.currentPair);
+            const analysis = analyzeSignals(indicators);
+            renderDashboard(analysis);
+            
+            const allPairs = ['EUR_USD', 'GBP_USD', 'USD_JPY', 'AUD_USD', 'USD_CAD', 'EUR_GBP'];
+            const signals = allPairs.map(pair => analyzeSignals(generateIndicators(pair)));
+            signals.sort((a, b) => b.strength - a.strength);
+            renderSignals(signals);
+            
+            showMessage('📊 Dados simulados gerados', 'info');
+        }
+
+        function refreshData() {
+            if (APP_STATE.usingRealData) {
+                fetchRealTimeData();
+            } else {
+                useSimulatedData();
+            }
+        }
+
+        function showMessage(message, type) {
+            const messageArea = document.getElementById('messageArea');
+            messageArea.textContent = message;
+            messageArea.className = `message-area ${type}`;
+            
+            setTimeout(() => {
+                messageArea.className = 'message-area';
+            }, 5000);
+        }
+
+        // Auto-refresh
+        setInterval(() => {
+            updateMarketStatus();
+            if (APP_STATE.usingRealData) {
+                fetchRealTimeData();
+            }
+        }, 60000);
+
+        console.log('🚀 Sistema pronto! Clique nos sinais para ver detalhes de entrada e TP.');
+    </script>
+</body>
+</html>
